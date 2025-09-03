@@ -1,0 +1,89 @@
+.form-container {
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 255, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.form-container:hover {
+    box-shadow: 0 6px 15px rgba(0, 255, 0, 0.15);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: slideIn 0.5s ease forwards;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-group:nth-child(3) { animation-delay: 0.3s; }
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #00ff00;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #00ff00;
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    border-color: #00cc00;
+}
+
+.error {
+    color: #ff4444;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.game-form {
+    margin-top: 1rem;
+    display: none;
+}
+
+.game-input {
+    width: 200px;
+    padding: 0.75rem;
+    border: 1px solid #00ff00;
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-right: 1rem;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

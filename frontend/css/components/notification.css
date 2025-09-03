@@ -1,0 +1,24 @@
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background-color: #00ff00;
+    color: #121212;
+    border-radius: 5px;
+    font-weight: bold;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.5s ease;
+    box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
+    z-index: 1000;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification:hover {
+    box-shadow: 0 6px 20px rgba(0, 255, 0, 0.4);
+}

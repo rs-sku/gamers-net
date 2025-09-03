@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="http://localhost:8080/">
+    <title>GamersNet - Connect and play!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/components/buttons.css">
+    <link rel="stylesheet" href="css/components/forms.css">
+    <link rel="stylesheet" href="css/components/notification.css">
+    <link rel="stylesheet" href="css/pages/login.css">
+</head>
+<body>
+    <div class="container">
+        <h1>GamersNet</h1>
+        <div class="form-container">
+            <form id="join-form">
+                <div class="form-group">
+                    <label for="nickname">Nickname</label>
+                    <input type="text" id="nickname" name="nickname" required>
+                    <div id="nickname-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                    <div id="email-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                    <div id="password-error" class="error"></div>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Create account</button>
+                    <button type="button" id="show-login" class="btn btn-secondary">Log in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="background-animation"></div>
+    <div class="notification" id="notification"></div>
+    
+    <script type="module" src="js/api/auth.js"></script>
+    <script type="module" src="js/components/notification.js"></script>
+    <script type="module" src="js/utils/validation.js"></script>
+    <script type="module" src="js/pages/login.js"></script>
+</body>
+</html>

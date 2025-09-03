@@ -1,0 +1,12 @@
+fastapi==0.115.2
+pydantic==2.9.2
+SQLAlchemy==2.0.35
+uvicorn==0.31.1
+python-dotenv==1.0.1
+asyncpg==0.29.0
+passlib==1.7.4
+bcrypt==4.0.1
+PyJWT==2.9.0
+
+# for frontend
+# jQuery
