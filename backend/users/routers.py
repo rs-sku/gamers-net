@@ -7,7 +7,9 @@ users_router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
 
 @users_router.post("", response_model=UserResponseSchema, status_code=201)
-async def create_user(data: UserRequestSchema, service: ServiceDep) -> UserResponseSchema:
+async def create_user(
+    data: UserRequestSchema, service: ServiceDep
+) -> UserResponseSchema:
     response = await service.add_user(data)
     return response
 

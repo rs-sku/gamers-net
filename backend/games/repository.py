@@ -30,7 +30,9 @@ class Repository:
 
     async def get_user_games(self, user_id: int) -> list[UserGame]:
         result = await self._session.execute(
-            select(UserGame).options(joinedload(UserGame.game), joinedload(UserGame.user)).filter_by(user_id=user_id)
+            select(UserGame)
+            .options(joinedload(UserGame.game), joinedload(UserGame.user))
+            .filter_by(user_id=user_id)
         )
         return result.scalars().all()
 
@@ -54,5 +56,7 @@ class Repository:
         game = await self.get_game_by_filters(name=game_name)
         if not game:
             raise GameNotFound(game_name)
-        await self._session.execute(delete(UserGame).filter_by(user_id=user_id, game_id=game.id))
+        await self._session.execute(
+            delete(UserGame).filter_by(user_id=user_id, game_id=game.id)
+        )
         await self._session.commit()

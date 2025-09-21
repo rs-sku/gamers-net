@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class UserGameRequestSchema(BaseModel):
     name: str
 
+
 class CreateUserGameResponseSchema(BaseModel):
     id: int
     user_id: int
@@ -17,7 +18,7 @@ class GetUserGamesResponseSchema(BaseModel):
     user_nickname: str
     game_name: str
 
+
 class GetGameResponseSchema(BaseModel):
     id: int
     name: str
-

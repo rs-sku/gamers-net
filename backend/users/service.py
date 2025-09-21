@@ -2,10 +2,12 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 
 from backend.users.repository import Repository
-from backend.users.schemas import (UserLoginSchema, UserRequestSchema,
-                                   UserResponseSchema)
-from backend.users.security import (create_access_token, get_password_hash,
-                                    verify_password)
+from backend.users.schemas import UserLoginSchema, UserRequestSchema, UserResponseSchema
+from backend.users.security import (
+    create_access_token,
+    get_password_hash,
+    verify_password,
+)
 
 
 class Service:
@@ -24,13 +26,20 @@ class Service:
             elif "users_email_key" in str(e.orig):
                 raise HTTPException(status_code=409, detail="Email already exists")
             else:
-                raise HTTPException(status_code=409, detail="An unknown integrity error occurred")
+                raise HTTPException(
+                    status_code=409, detail="An unknown integrity error occurred"
+                )
 
     async def get_users(self) -> list[UserResponseSchema]:
         users = await self._repository.get_users()
-        return [UserResponseSchema.model_validate(user, from_attributes=True) for user in users]
+        return [
+            UserResponseSchema.model_validate(user, from_attributes=True)
+            for user in users
+        ]
 
-    async def authenticate_user(self, password: str, nickname: str | None = None, email: str | None = None) -> int:
+    async def authenticate_user(
+        self, password: str, nickname: str | None = None, email: str | None = None
+    ) -> int:
         user = None
         if nickname:
             user = await self._repository.get_user_by_filters(nickname=nickname)

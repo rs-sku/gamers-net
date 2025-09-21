@@ -6,10 +6,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.core.config import CORS_CONFIG
-from backend.core.settings import Settings
 from backend.core.database import DbSession, close_orm, init_orm
 from backend.core.exceptions import http_exception_handler
 from backend.core.middlewares import auth_middleware
+from backend.core.settings import Settings
 from backend.data.scripts.load_games import load_games
 from backend.games.repository import Repository
 from backend.games.routers import games_router

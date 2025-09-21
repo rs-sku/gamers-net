@@ -30,8 +30,12 @@ class UserGame(Base):
     __tablename__ = "users_games"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
-    game_id: Mapped[int] = mapped_column(Integer, ForeignKey("games.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False
+    )
+    game_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("games.id"), nullable=False
+    )
 
     user = relationship("User", back_populates="user_games")
     game = relationship("Game", back_populates="user_games")

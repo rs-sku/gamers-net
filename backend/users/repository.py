@@ -24,4 +24,3 @@ class Repository:
         result = await self._session.execute(select(User).filter_by(**kwargs))
         user = result.scalars().first()
         return user
-

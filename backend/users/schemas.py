@@ -49,8 +49,8 @@ class UserLoginSchema(BaseModel):
     nickname: str | None = None
     password: str
 
-    @model_validator(mode='after')
-    def check_fields(self) -> 'UserLoginSchema':
+    @model_validator(mode="after")
+    def check_fields(self) -> "UserLoginSchema":
         if not self.email and not self.nickname:
             raise ValueError("Either email or nickname must be provided")
         if not self.password:
