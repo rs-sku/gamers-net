@@ -17,7 +17,7 @@ async def create_user(
 @users_router.post("/login", response_model=bool, status_code=201)
 async def login(response: Response, data: UserLoginSchema, service: ServiceDep) -> bool:
     token = await service.login_user(data)
-    response.set_cookie(key="access_token", value=token, httponly=True, samesite="Lax")
+    response.set_cookie(key="access_token", value=token, httponly=True, samesite="lax")
     return True
 
 

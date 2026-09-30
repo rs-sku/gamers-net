@@ -11,7 +11,7 @@ from backend.users.security import (
 
 
 class Service:
-    def __init__(self, repository: Repository):
+    def __init__(self, repository: Repository) -> None:
         self._repository = repository
 
     async def add_user(self, data: UserRequestSchema) -> UserResponseSchema:
