@@ -135,10 +135,8 @@ function showLoginForm() {
     document.querySelector('button[type="submit"]').textContent = 'Log in';
     showLoginBtn.textContent = 'Create account';
 
-    const newForm = joinForm.cloneNode(true);
-    joinForm.parentNode.replaceChild(newForm, joinForm);
-    
-    newForm.addEventListener('submit', loginFormSubmit);
+    joinForm.removeEventListener('submit', joinFormSubmit);
+    joinForm.addEventListener('submit', loginFormSubmit);
     showLoginBtn.removeEventListener('click', showLoginForm);
     showLoginBtn.addEventListener('click', showJoinForm);
 }
@@ -160,10 +158,8 @@ function showJoinForm() {
     document.querySelector('button[type="submit"]').textContent = 'Create account';
     showLoginBtn.textContent = 'Log in';
 
-    const newForm = joinForm.cloneNode(true);
-    joinForm.parentNode.replaceChild(newForm, joinForm);
-    
-    newForm.addEventListener('submit', joinFormSubmit);
+    joinForm.removeEventListener('submit', loginFormSubmit);
+    joinForm.addEventListener('submit', joinFormSubmit);
     showLoginBtn.removeEventListener('click', showJoinForm);
     showLoginBtn.addEventListener('click', showLoginForm);
 }

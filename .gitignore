@@ -161,3 +161,4 @@ cython_debug/
 volumes
 tmp
 .ruff_cache
+AGENTS.md
