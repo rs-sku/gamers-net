@@ -65,3 +65,10 @@ class GetFriendsResponseSchema(BaseModel):
 
 class UpdatePendingFriendRequestStatusSchema(BaseModel):
     new_status: FriendRequestStatus
+
+
+class FriendRequestResponseSchema(BaseModel):
+    id: int
+    requesting_user_id: int
+    requested_user_id: int
+    status: FriendRequestStatus

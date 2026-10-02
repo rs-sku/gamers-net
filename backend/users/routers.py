@@ -3,6 +3,7 @@ from fastapi import APIRouter, Request, Response
 from backend.users.dependencies import ServiceDep
 from backend.users.enums import FriendRequestStatus
 from backend.users.schemas import (
+    FriendRequestResponseSchema,
     GetFriendsResponseSchema,
     UpdatePendingFriendRequestStatusSchema,
     UserLoginSchema,
@@ -38,10 +39,21 @@ async def logout(response: Response) -> bool:
     return True
 
 
-@users_router.post("/friend", response_model=bool, status_code=201)
-async def add_friend(service: ServiceDep, friend_name: str, request: Request) -> bool:
+@users_router.get("/me", response_model=UserResponseSchema, status_code=200)
+async def get_current_user(request: Request, service: ServiceDep) -> UserResponseSchema:
+    return await service.get_current_user(request.state.user_id)
+
+
+@users_router.post("/friend-request", response_model=bool, status_code=201)
+async def add_friend_request(service: ServiceDep, friend_name: str, request: Request) -> bool:
     user_id = request.state.user_id
-    await service.add_friend(user_id, friend_name)
+    await service.add_pending_friend_request(user_id, friend_name)
+    return True
+
+
+@users_router.post("/friend", response_model=bool, status_code=201)
+async def add_friend(service: ServiceDep, friend_request_id: int) -> bool:
+    await service.add_friend_from_accepted_friend_request(friend_request_id)
     return True
 
 
@@ -51,18 +63,32 @@ async def get_friends(service: ServiceDep, name: str) -> GetFriendsResponseSchem
     return friends
 
 
-@users_router.get("/friend-requests", response_model=list[int], status_code=200)
-async def get_friend_requests(
+@users_router.get(
+    "/incoming-friend-requests", response_model=list[FriendRequestResponseSchema], status_code=200
+)
+async def get_incoming_friend_requests(
     request: Request,
     status: FriendRequestStatus,
     service: ServiceDep,
-) -> list[int]:
+) -> list[FriendRequestResponseSchema]:
     user_id = request.state.user_id
-    return await service.get_user_friend_requests_by_status(user_id, status)
+    return await service.get_user_incoming_friend_requests_by_status(user_id, status)
+
+
+@users_router.get(
+    "/outgoing-friend-requests", response_model=list[FriendRequestResponseSchema], status_code=200
+)
+async def get_outgoing_friend_requests(
+    request: Request,
+    status: FriendRequestStatus,
+    service: ServiceDep,
+) -> list[FriendRequestResponseSchema]:
+    user_id = request.state.user_id
+    return await service.get_user_outgoing_friend_requests_by_status(user_id, status)
 
 
 @users_router.patch(
-    "/friend-requests",
+    "/pending-friend-requests",
     response_model=UpdatePendingFriendRequestStatusSchema,
     status_code=200,
 )

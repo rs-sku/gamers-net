@@ -4,14 +4,17 @@ from fastapi.responses import JSONResponse
 from backend.users.security import decode_access_token
 
 protected_routes = [
+    ("GET", "/api/v1/users/me"),
     ("POST", "/api/v1/users/logout"),
     ("POST", "/api/v1/games"),
     ("GET", "/api/v1/games"),
     ("DELETE", "/api/v1/games"),
+    ("POST", "/api/v1/users/friend-request"),
     ("POST", "/api/v1/users/friend"),
     ("GET", "/api/v1/users/friends"),
-    ("GET", "/api/v1/users/friend-requests"),
-    ("PATCH", "/api/v1/users/friend-requests"),
+    ("GET", "/api/v1/users/incoming-friend-requests"),
+    ("GET", "/api/v1/users/outgoing-friend-requests"),
+    ("PATCH", "/api/v1/users/pending-friend-requests"),
 ]
 
 
