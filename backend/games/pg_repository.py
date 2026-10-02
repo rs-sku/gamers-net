@@ -55,5 +55,7 @@ class PgRepository(BasePgRepository):
 
         if game is None:
             raise NotFoundException(f"{game_name} not found")
-        await self._session.execute(delete(UserGame).filter_by(user_id=user_id, game_id=game.id))
+        await self._session.execute(
+            delete(UserGame).filter_by(user_id=user_id, game_id=game.id)
+        )
         await self._session.commit()

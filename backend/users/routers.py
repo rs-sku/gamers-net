@@ -15,7 +15,9 @@ users_router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
 
 @users_router.post("", response_model=UserResponseSchema, status_code=201)
-async def create_user(data: UserRequestSchema, service: ServiceDep) -> UserResponseSchema:
+async def create_user(
+    data: UserRequestSchema, service: ServiceDep
+) -> UserResponseSchema:
     response = await service.add_user(data)
     return response
 
@@ -44,7 +46,9 @@ async def get_current_user(request: Request, service: ServiceDep) -> UserRespons
     return await service.get_current_user(request.state.user_id)
 
 
-@users_router.post("/friend-request", response_model=FriendRequestResponseSchema, status_code=201)
+@users_router.post(
+    "/friend-request", response_model=FriendRequestResponseSchema, status_code=201
+)
 async def add_friend_request(
     service: ServiceDep, friend_name: str, request: Request
 ) -> FriendRequestResponseSchema:
@@ -91,14 +95,14 @@ async def get_outgoing_friend_requests(
     response_model=UpdatePendingFriendRequestStatusSchema,
     status_code=200,
 )
-async def process_pending_friend_request_status(
+async def process_pending_friend_request(
     request: Request,
     requesting_user_id: int,
     data: UpdatePendingFriendRequestStatusSchema,
     service: ServiceDep,
 ) -> UpdatePendingFriendRequestStatusSchema:
     requested_user_id = request.state.user_id
-    return await service.process_pending_friend_request_status(
+    return await service.process_pending_friend_request(
         requested_user_id=requested_user_id,
         requesting_user_id=requesting_user_id,
         new_status=data.new_status,

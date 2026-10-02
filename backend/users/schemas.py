@@ -15,28 +15,28 @@ class UserRequestSchema(BaseModel):
     def validate_password(cls, password: str) -> str:
         if len(password) < 8:
             raise ValueError(
-                "Password must be at least 8 characters long, contains at least one uppercase letter, "
-                "one lowercase letter, one digit and one special character"
+                "Password must be at least 8 characters long, contains at least one uppercase "
+                "letter, one lowercase letter, one digit and one special character"
             )
         if not re.search(r"[A-Z]", password):
             raise ValueError(
-                "Password must be at least 8 characters long, contains at least one uppercase letter, "
-                "one lowercase letter, one digit and one special character"
+                "Password must be at least 8 characters long, contains at least one uppercase "
+                "letter, one lowercase letter, one digit and one special character"
             )
         if not re.search(r"[a-z]", password):
             raise ValueError(
-                "Password must be at least 8 characters long, contains at least one uppercase letter, "
-                "one lowercase letter, one digit and one special character"
+                "Password must be at least 8 characters long, contains at least one uppercase "
+                "letter, one lowercase letter, one digit and one special character"
             )
         if not re.search(r"[0-9]", password):
             raise ValueError(
-                "Password must be at least 8 characters long, contains at least one uppercase letter, "
-                "one lowercase letter, one digit and one special character"
+                "Password must be at least 8 characters long, contains at least one uppercase "
+                "letter, one lowercase letter, one digit and one special character"
             )
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
             raise ValueError(
-                "Password must be at least 8 characters long, contains at least one uppercase letter, "
-                "one lowercase letter, one digit and one special character"
+                "Password must be at least 8 characters long, contains at least one uppercase "
+                "letter, one lowercase letter, one digit and one special character"
             )
         return password
 

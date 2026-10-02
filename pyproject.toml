@@ -1,4 +1,5 @@
 [tool.ruff]
-extend-select = ["I"]
-select = ["E", "F", "ANN"]
+line-length = 100
+lint.extend-select = ["I"]
+lint.select = ["E", "F", "ANN"]
 exclude =["tmp", ".venv"]

@@ -1,6 +1,17 @@
-import { logout, checkAuth, getAllUsers } from '../api/auth.js';
+import { logout, checkAuth } from '../api/auth.js';
 import { getUserGames, addUserGame, getAllGames } from '../api/games.js';
 import { showNotification } from '../components/notification.js';
+import { initializeFriends } from './friends.js';
+
+function showSection(sectionId) {
+    const sections = ['friends-container', 'users-container', 'games-container', 'game-form'];
+    sections.forEach(id => {
+        document.getElementById(id).style.display = id === sectionId ? 'block' : 'none';
+    });
+    document.querySelectorAll('.profile-navigation button').forEach((button, index) => {
+        button.setAttribute('aria-pressed', String(sections[index] === sectionId));
+    });
+}
 
 async function checkAuthentication() {
     try {
@@ -9,8 +20,10 @@ async function checkAuthentication() {
             window.location.replace('http://localhost:8080/');
             return false;
         }
+        const user = await response.json();
+        document.getElementById('profile-nickname').textContent = user.nickname;
         document.body.style.display = 'block';
-        return true;
+        return user;
     } catch (error) {
         console.error('Auth check failed:', error);
         window.location.replace('http://localhost:8080/');
@@ -18,23 +31,8 @@ async function checkAuthentication() {
     }
 }
 
-async function fetchUsers() {
-    try {
-        const response = await getAllUsers();
-        
-        if (response.ok) {
-            const users = await response.json();
-            displayUsers(users);
-        } else {
-            showNotification('Failed to fetch users');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification('Error fetching users');
-    }
-}
-
 async function fetchUserGames() {
+    showSection('games-container');
     try {
         const games = await getUserGames();
         displayGames(games);
@@ -42,22 +40,6 @@ async function fetchUserGames() {
         console.error('Error:', error);
         showNotification('Error fetching games');
     }
-}
-
-function displayUsers(users) {
-    const usersList = document.getElementById('users-list');
-    usersList.innerHTML = '';
-    
-    users.forEach(user => {
-        const li = document.createElement('li');
-        li.className = 'data-item';
-        li.textContent = `Nickname: ${user.nickname} | Email: ${user.email}`;
-        usersList.appendChild(li);
-    });
-    
-    document.getElementById('users-container').style.display = 'block';
-    document.getElementById('games-container').style.display = 'none';
-    document.getElementById('game-form').style.display = 'none';
 }
 
 function displayGames(games) {
@@ -70,10 +52,6 @@ function displayGames(games) {
         li.textContent = `Game: ${game.game_name}`;
         gamesList.appendChild(li);
     });
-    
-    document.getElementById('games-container').style.display = 'block';
-    document.getElementById('users-container').style.display = 'none';
-    document.getElementById('game-form').style.display = 'none';
 }
 
 // Обновляем функцию loadAvailableGames
@@ -105,14 +83,10 @@ async function loadAvailableGames() {
 
 function toggleGameForm() {
     const gameForm = document.getElementById('game-form');
-    const usersContainer = document.getElementById('users-container');
-    const gamesContainer = document.getElementById('games-container');
     
     if (gameForm.style.display === 'none' || gameForm.style.display === '') {
-        gameForm.style.display = 'block';
+        showSection('game-form');
         loadAvailableGames();
-        usersContainer.style.display = 'none';
-        gamesContainer.style.display = 'none';
     } else {
         gameForm.style.display = 'none';
     }
@@ -130,7 +104,7 @@ async function handleAddGame(event) {
     errorElement.textContent = '';
     errorElement.style.display = 'none';
     
-    if (!gameName) {
+    if (!gameSelect.value) {
         errorElement.textContent = 'Please select a game';
         errorElement.style.display = 'block';
         return;
@@ -144,7 +118,6 @@ async function handleAddGame(event) {
         showNotification('Game added successfully!');
         gameSelect.value = '';
         await fetchUserGames();
-        toggleGameForm();
     } catch (error) {
         console.error('Error:', error);
         errorElement.textContent = error.message;
@@ -165,7 +138,6 @@ function handleAddGameError(status, data, errorElement) {
 }
 
 function initializeEventListeners() {
-    document.getElementById('show-users-btn').addEventListener('click', fetchUsers);
     document.getElementById('show-games-btn').addEventListener('click', fetchUserGames);
     document.getElementById('add-game-btn').addEventListener('click', toggleGameForm);
     document.getElementById('submit-game-btn').addEventListener('click', (e) => handleAddGame(e));
@@ -196,7 +168,9 @@ async function handleLogout() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    if (await checkAuthentication()) {
+    const currentUser = await checkAuthentication();
+    if (currentUser) {
         initializeEventListeners();
+        initializeFriends(currentUser, showSection);
     }
 });

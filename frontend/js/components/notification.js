@@ -1,6 +1,9 @@
+let notificationTimer;
+
 export function showNotification(message) {
     const notification = document.getElementById('notification');
     if (!notification) return;
+    clearTimeout(notificationTimer);
 
     // Удаляем предыдущую анимацию, если она есть
     notification.classList.remove('show');
@@ -11,7 +14,7 @@ export function showNotification(message) {
     notification.textContent = message;
     notification.classList.add('show');
     
-    setTimeout(() => {
+    notificationTimer = setTimeout(() => {
         notification.classList.remove('show');
     }, 3000);
 }
