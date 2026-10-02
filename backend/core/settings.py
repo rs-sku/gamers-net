@@ -18,9 +18,17 @@ class Settings:
     POSTGRES_DB = get_required_setting("POSTGRES_DB")
     POSTGRES_USER = get_required_setting("POSTGRES_USER")
     POSTGRES_PASSWORD = get_required_setting("POSTGRES_PASSWORD")
+
     BACKEND_HOST = get_required_setting("BACKEND_HOST")
     BACKEND_PORT = get_required_setting("BACKEND_PORT")
+
     FRONTEND_HOST = get_required_setting("FRONTEND_HOST")
     FRONTEND_PORT = get_required_setting("FRONTEND_PORT")
+
     SECRET_KEY = get_required_setting("SECRET_KEY")
     ALGORITHM = get_required_setting("ALGORITHM")
+
+    NEO4J_LOGIN = get_required_setting("NEO4J_LOGIN")
+    NEO4J_PASSWORD = get_required_setting("NEO4J_PASSWORD")
+    NEO4J_DB = get_required_setting("NEO4J_DB")
+    NEO4J_URI = get_required_setting("NEO4J_URI")

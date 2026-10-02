@@ -8,7 +8,7 @@ from backend.core.exceptions import NotFoundException
 from backend.models.users_games import Game, UserGame
 
 
-class Repository:
+class PgRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 

@@ -6,3 +6,12 @@ services:
       - '5432:5432'
     volumes:
       - ./volumes/postgres:/var/lib/postgresql
+
+  neo4j:
+    image: neo4j:5-community
+    env_file: '.env'
+    ports:
+      - '7474:7474' # Веб-интерфейс (Neo4j Browser)
+      - '7687:7687' # Bolt-протокол для подключения из кода (драйверов)
+    volumes:
+      - ./volumes/neo4j/data:/data

@@ -9,7 +9,7 @@ class UserRequestSchema(BaseModel):
     password: str
 
     @field_validator("password")
-    def validate_password(cls, password):
+    def validate_password(cls, password: str) -> str:
         if len(password) < 8:
             raise ValueError(
                 "Password must be at least 8 characters long, contains at least one uppercase letter, "
@@ -56,3 +56,12 @@ class UserLoginSchema(BaseModel):
         if not self.password:
             raise ValueError("Password must not be empty")
         return self
+
+
+class AddFriendRequestSchema(BaseModel):
+    name: str
+    friend_name: str
+
+
+class GetFriendsResponseSchema(BaseModel):
+    friends: list[str]

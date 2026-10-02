@@ -7,7 +7,7 @@ from backend.core.exceptions import NotFoundException
 from backend.models.users_games import User
 
 
-class Repository:
+class PgRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
@@ -23,9 +23,7 @@ class Repository:
         users = result.scalars().all()
         return users
 
-    async def get_user_by_filters(self, **kwargs) -> User:  # noqa: ANN003
+    async def get_user_by_filters(self, **kwargs) -> User | None:  # noqa: ANN003
         result = await self._session.execute(select(User).filter_by(**kwargs))
         user = result.scalars().first()
-        if not user:
-            raise NotFoundException("User not found")
         return user

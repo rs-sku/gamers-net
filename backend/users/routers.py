@@ -1,15 +1,19 @@
 from fastapi import APIRouter, Response
 
 from backend.users.dependencies import ServiceDep
-from backend.users.schemas import UserLoginSchema, UserRequestSchema, UserResponseSchema
+from backend.users.schemas import (
+    AddFriendRequestSchema,
+    GetFriendsResponseSchema,
+    UserLoginSchema,
+    UserRequestSchema,
+    UserResponseSchema,
+)
 
 users_router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
 
 @users_router.post("", response_model=UserResponseSchema, status_code=201)
-async def create_user(
-    data: UserRequestSchema, service: ServiceDep
-) -> UserResponseSchema:
+async def create_user(data: UserRequestSchema, service: ServiceDep) -> UserResponseSchema:
     response = await service.add_user(data)
     return response
 
@@ -31,3 +35,15 @@ async def get_users(service: ServiceDep) -> list[UserResponseSchema]:
 async def logout(response: Response) -> bool:
     response.delete_cookie(key="access_token")
     return True
+
+
+@users_router.post("/friend", response_model=bool, status_code=201)
+async def add_friend(service: ServiceDep, data: AddFriendRequestSchema) -> bool:
+    await service.add_friend(data)
+    return True
+
+
+@users_router.get("/friends", response_model=GetFriendsResponseSchema, status_code=200)
+async def get_friends(service: ServiceDep, name: str) -> GetFriendsResponseSchema:
+    friends = await service.get_friends(name)
+    return friends
