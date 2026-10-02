@@ -10,6 +10,8 @@ protected_routes = [
     ("DELETE", "/api/v1/games"),
     ("POST", "/api/v1/users/friend"),
     ("GET", "/api/v1/users/friends"),
+    ("GET", "/api/v1/users/friend-requests"),
+    ("PATCH", "/api/v1/users/friend-requests"),
 ]
 
 

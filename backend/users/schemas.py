@@ -61,3 +61,7 @@ class UserLoginSchema(BaseModel):
 
 class GetFriendsResponseSchema(BaseModel):
     friends: list[str]
+
+
+class UpdatePendingFriendRequestStatusSchema(BaseModel):
+    new_status: FriendRequestStatus

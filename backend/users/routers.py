@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Request, Response
 
 from backend.users.dependencies import ServiceDep
+from backend.users.enums import FriendRequestStatus
 from backend.users.schemas import (
     GetFriendsResponseSchema,
+    UpdatePendingFriendRequestStatusSchema,
     UserLoginSchema,
     UserRequestSchema,
     UserResponseSchema,
@@ -47,3 +49,32 @@ async def add_friend(service: ServiceDep, friend_name: str, request: Request) ->
 async def get_friends(service: ServiceDep, name: str) -> GetFriendsResponseSchema:
     friends = await service.get_friends(name)
     return friends
+
+
+@users_router.get("/friend-requests", response_model=list[int], status_code=200)
+async def get_friend_requests(
+    request: Request,
+    status: FriendRequestStatus,
+    service: ServiceDep,
+) -> list[int]:
+    user_id = request.state.user_id
+    return await service.get_user_friend_requests_by_status(user_id, status)
+
+
+@users_router.patch(
+    "/friend-requests",
+    response_model=UpdatePendingFriendRequestStatusSchema,
+    status_code=200,
+)
+async def change_pending_friend_request_status(
+    request: Request,
+    requesting_user_id: int,
+    data: UpdatePendingFriendRequestStatusSchema,
+    service: ServiceDep,
+) -> UpdatePendingFriendRequestStatusSchema:
+    requested_user_id = request.state.user_id
+    return await service.change_pending_friend_request_status(
+        requested_user_id=requested_user_id,
+        requesting_user_id=requesting_user_id,
+        new_status=data.new_status,
+    )

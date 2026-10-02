@@ -8,6 +8,7 @@ from backend.users.neo4j_repository import Neo4jRepository
 from backend.users.pg_repository import PgRepository
 from backend.users.schemas import (
     GetFriendsResponseSchema,
+    UpdatePendingFriendRequestStatusSchema,
     UserLoginSchema,
     UserRequestSchema,
     UserResponseSchema,
@@ -85,4 +86,24 @@ class Service:
         )
         return [request.requesting_user_id for request in requests]
 
-    # async def change_friend_request_status(self, )
+    async def change_pending_friend_request_status(
+        self,
+        requested_user_id: int,
+        requesting_user_id: int,
+        new_status: FriendRequestStatus,
+    ) -> UpdatePendingFriendRequestStatusSchema:
+        requests = await self._pg_repository.get_by_filters(
+            model=FriendRequest,
+            requested_user_id=requested_user_id,
+            requesting_user_id=requesting_user_id,
+        )
+        request = requests[0] if requests else None
+        if request is None:
+            raise NotFoundException("Friend request not found")
+
+        if request.status != FriendRequestStatus.PENDING:
+            raise HTTPException(status_code=400, detail="Friend request status must be 'PENDING'")
+
+        request.status = new_status
+        updated = await self._pg_repository.update(request)
+        return UpdatePendingFriendRequestStatusSchema(new_status=updated.status)

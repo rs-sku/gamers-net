@@ -32,3 +32,9 @@ class BasePgRepository:
         query = await self._session.execute(select(model).filter_by(**filters))
         result = query.scalars().all()
         return result
+
+    async def update(self, model: ModelT) -> ModelT:
+        self._session.add(model)
+        await self._session.commit()
+        await self._session.refresh(model)
+        return model
