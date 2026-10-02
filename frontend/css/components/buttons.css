@@ -1,101 +1,53 @@
-.btn {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
+.btn, .cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.4;
     cursor: pointer;
-    transition: all 0.3s ease;
-    margin: 0.5rem;
-    position: relative;
-    overflow: hidden;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.btn:active {
-    transform: translateY(1px);
-}
-
-.btn::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 5px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.5);
-    opacity: 0;
-    border-radius: 100%;
-    transform: scale(1, 1) translate(-50%);
-    transform-origin: 50% 50%;
-}
-
-.btn:focus:not(:active)::after {
-    animation: ripple 1s ease-out;
-}
-
-.btn-primary {
-    background-color: #00ff00;
-    color: #121212;
-    box-shadow: 0 2px 5px rgba(0, 255, 0, 0.2);
-}
-
-.btn-primary:hover {
-    background-color: #00cc00;
-    box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
-    transform: translateY(-2px);
-}
+.btn-primary, .cta-button { background-color: var(--accent); color: #282116; }
+.btn-primary:hover, .cta-button:hover { background-color: var(--accent-hover); }
 
 .btn-secondary {
     background-color: transparent;
-    color: #00ff00;
-    border: 1px solid #00ff00;
-    box-shadow: 0 2px 5px rgba(0, 255, 0, 0.1);
+    color: var(--text);
+    border-color: var(--border);
 }
 
 .btn-secondary:hover {
-    background-color: rgba(0, 255, 0, 0.1);
-    box-shadow: 0 4px 15px rgba(0, 255, 0, 0.2);
-    transform: translateY(-2px);
+    background-color: var(--surface-raised);
+    border-color: var(--muted);
 }
 
 .logout-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background-color: #ff4444;
-    color: #ffffff;
+    background-color: transparent;
+    border-color: var(--border);
+    color: var(--muted);
 }
 
 .logout-btn:hover {
-    background-color: #cc0000;
+    background-color: #37262f;
+    border-color: #80515d;
+    color: var(--danger);
 }
 
-.cta-button {
-    padding: 15px 30px;
-    font-size: 1.2rem;
-    background-color: #00ff00;
-    color: #121212;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    opacity: 0;
-    animation: fadeIn 2s forwards 2s;
+.btn:focus-visible, .cta-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
 }
 
-.cta-button:hover {
-    background-color: #00cc00;
-    transform: scale(1.05);
-}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-@keyframes ripple {
-    0% {
-        transform: scale(0, 0);
-        opacity: 0.5;
-    }
-    100% {
-        transform: scale(100, 100);
-        opacity: 0;
-    }
+@media (pointer: coarse) {
+    .btn, .cta-button { min-height: 44px; }
 }

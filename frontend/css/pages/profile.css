@@ -1,216 +1,155 @@
-.content-container {
-    background-color: #1e1e1e;
-    border-radius: 8px;
-    padding: 2rem;
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
-    margin-bottom: 2rem;
-    transition: all 0.3s ease;
-}
-
-.content-container:hover {
-    box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
-}
-
-.data-container {
-    margin-top: 2rem;
-    display: none;
-}
-
-.data-list {
-    list-style: none;
-    padding: 0;
-}
-
-.data-item {
-    background-color: #2a2a2a;
-    margin: 0.5rem 0;
-    padding: 1rem;
-    border-radius: 4px;
-    border: 1px solid #00ff00;
-    transition: all 0.3s ease;
-}
-
-.data-item:hover {
-    transform: translateX(5px);
-    box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
-}
-
-.game-form {
-    margin-top: 1rem;
-    display: none;
-}
-
-.game-input {
-    width: 300px;
-    padding: 0.75rem;
-    border: 1px solid #00ff00;
-    background-color: #2a2a2a;
-    color: #e0e0e0;
-    border-radius: 4px;
-    font-size: 1rem;
-    margin-right: 1rem;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ff00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 1em;
-    padding-right: 2.5rem;
-}
-
-.game-input option {
-    background-color: #2a2a2a;
-    color: #e0e0e0;
-    padding: 0.75rem;
-}
-
-.game-input:focus {
-    outline: none;
-    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
-    border-color: #00cc00;
-}
-
-.error-message {
-    color: #ff4444;
-    margin-top: 0.5rem;
-    display: none;
-}
-
-.btn {
-    transition: all 0.3s ease;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 255, 0, 0.2);
-}
-
-.profile-nickname {
-    text-align: center;
-    margin-top: -1rem;
-    margin-bottom: 2rem;
-    overflow-wrap: anywhere;
-}
-
-.profile-navigation,
-.section-heading,
-.friend-item,
-.friend-form-controls,
-.friend-actions {
+.profile-header {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
-.profile-navigation .btn,
-.friend-actions .btn,
-.friend-form-controls .btn,
-.section-heading .btn {
-    margin: 0;
+.brand {
+    display: inline-block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    text-decoration: none;
 }
+
+.profile-header h1 { text-align: left; margin-bottom: 8px; }
+.profile-nickname { color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+.content-container { margin-bottom: 20px; }
+
+.profile-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 20px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.profile-navigation .btn {
+    background-color: transparent;
+    color: var(--muted);
+    font-weight: 400;
+    flex: 1;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.profile-navigation .btn:hover { background-color: var(--surface-raised); color: var(--text); }
 
 .profile-navigation .btn[aria-pressed="true"] {
-    outline: 2px solid #e0e0e0;
-    outline-offset: 3px;
+    background-color: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+    border-color: #665438;
 }
 
-.section-heading,
-.friend-item {
-    justify-content: space-between;
-}
+.data-container, .game-form { display: none; }
 
-.section-heading h2 {
-    margin: 0;
-}
-
-.friend-request-form {
-    margin: 1.5rem 0;
-}
-
-.friend-request-form label,
-.user-search {
-    display: block;
-    margin: 0.75rem 0;
-}
-
-input.friend-input {
-    box-sizing: border-box;
-    width: min(100%, 300px);
+.panel, #users-container, #games-container, .game-form {
     min-width: 0;
-    padding: 0.75rem;
-    border: 1px solid #00ff00;
-    border-radius: 4px;
-    background-color: #2a2a2a;
-    color: #e0e0e0;
-    font: inherit;
+    padding: 14px;
+    background-color: var(--surface-raised);
+    border: 1px solid #50504c;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
 }
 
-.friend-input:focus-visible,
-.content-container .btn:focus-visible {
-    outline: 2px solid #00ff00;
-    outline-offset: 3px;
+.friendship-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+    align-items: start;
 }
 
-.player-info {
-    min-width: 0;
-    overflow-wrap: anywhere;
-}
+.requests-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.section-heading, .friend-item, .friend-actions { display: flex; align-items: center; gap: 12px; }
+.section-heading, .friend-item { justify-content: space-between; }
+.section-heading h2, .panel h2 { margin-bottom: 4px; }
 
-.player-email {
-    display: block;
-    color: #b0b0b0;
-    margin-top: 0.4rem;
+.section-description {
+    color: var(--muted);
     font-size: 0.9rem;
-}
-
-.friend-status {
-    color: #00ff00;
-    font-size: 0.9rem;
-}
-
-.list-message {
-    color: #b0b0b0;
+    margin: 0 0 10px;
     line-height: 1.5;
 }
 
-#friendship-status:empty {
-    display: none;
+.section-heading .section-description, .request-panel .section-description { margin-bottom: 0; }
+.friend-request-form { margin: 0; }
+.friend-form-controls { display: flex; gap: 8px; align-items: stretch; }
+.friend-form-controls .friend-input { flex: 1; }
+.friend-form-controls .btn { flex-shrink: 0; }
+input.friend-input { width: 100%; min-width: 0; }
+.user-search { max-width: 420px; margin-bottom: 0; }
+
+.data-list { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 6px; }
+
+.data-item {
+    margin: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background-color: var(--surface);
+    transition: border-color 0.15s ease;
 }
 
-.content-container .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+.data-item:hover { border-color: #64615a; }
+.friend-item { flex-wrap: wrap; }
+.player-info { min-width: 0; flex: 1 1 160px; overflow-wrap: anywhere; }
+.player-info strong { font-size: 1rem; font-weight: 700; }
+.player-email { display: block; color: var(--muted); margin-top: 2px; font-size: 0.85rem; }
+.friend-actions { flex-wrap: wrap; gap: 8px; }
+.friend-actions .btn { font-size: 0.85rem; padding: 6px 12px; }
+
+.friend-status, .count-badge {
+    display: inline-block;
+    border: 1px solid #665438;
+    border-radius: 6px;
+    background-color: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 7px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    white-space: nowrap;
 }
 
-.notification {
-    top: 4.5rem;
-    box-sizing: border-box;
-    max-width: calc(100vw - 40px);
-    overflow-wrap: anywhere;
+.count-badge { margin-left: 6px; vertical-align: middle; }
+.list-message { color: var(--muted); font-size: 0.95rem; line-height: 1.5; margin: 0; }
+.data-list > .list-message { padding: 8px 10px; border: 1px dashed var(--border); border-radius: 6px; background-color: var(--surface); }
+
+#friendship-status:not(:empty), #friendship-error {
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+#friendship-status:empty { display: none; }
+#friendship-error { border-color: #80515d; background-color: #30232c; }
+.game-input { margin-bottom: 8px; }
+
+@media (max-width: 800px) {
+    .friendship-layout, .requests-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
-    .container {
-        padding: 4rem 1rem 1rem;
-    }
-
-    .content-container {
-        padding: 1rem;
-    }
-
-    .profile-navigation .btn {
-        flex: 1 1 100%;
-    }
-
-    .game-input {
-        box-sizing: border-box;
-        width: 100%;
-        margin-right: 0;
-    }
+    .profile-header { align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+    .profile-header > div { min-width: 0; }
+    .profile-header .logout-btn { flex-shrink: 0; padding: 10px 14px; }
+    .profile-navigation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 16px; }
+    .profile-navigation .btn { padding: 8px; font-size: 0.85rem; }
+    .panel, #users-container, #games-container, .game-form { padding: 12px; }
+    .friendship-layout, .requests-grid { gap: 20px; }
+    .friendship-layout { margin-bottom: 20px; }
+    .friend-form-controls { flex-direction: column; }
+    .friend-form-controls .friend-input { flex: auto; }
+    .section-heading { align-items: flex-start; }
+    .data-item { padding: 8px 10px; }
+    .game-input { width: 100%; margin-right: 0; }
 }

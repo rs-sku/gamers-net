@@ -14,9 +14,14 @@
 </head>
 <body style="display: none">
     <div class="container">
-        <button id="logout-btn" class="btn logout-btn">Log out</button>
-        <h1>Your profile</h1>
-        <p id="profile-nickname" class="profile-nickname"></p>
+        <header class="profile-header">
+            <div>
+                <a class="brand" href="/">GamersNet</a>
+                <h1>Your profile</h1>
+                <p id="profile-nickname" class="profile-nickname"></p>
+            </div>
+            <button id="logout-btn" class="btn logout-btn">Log out</button>
+        </header>
         <div class="content-container">
             <nav class="profile-navigation" aria-label="Profile sections">
                 <button id="show-friends-btn" class="btn btn-primary" aria-pressed="false">My friends <span id="friends-count">(0)</span><span id="incoming-nav-count"></span></button>
@@ -28,25 +33,44 @@
             <div id="friendship-error" class="error-message" role="alert"></div>
 
             <section id="friends-container" class="data-container" aria-label="Friends and requests">
-                <div class="section-heading">
-                    <h2>My friends</h2>
-                    <button id="refresh-friends-btn" class="btn btn-secondary">Refresh</button>
-                </div>
-                <form id="friend-request-form" class="friend-request-form">
-                    <label for="friend-nickname">Add a friend by nickname</label>
-                    <div class="friend-form-controls">
-                        <input id="friend-nickname" class="friend-input" type="text" name="nickname" maxlength="50" required autocomplete="off" placeholder="Enter exact nickname">
-                        <button id="send-friend-request-btn" class="btn btn-primary" type="submit">Send request</button>
+                <div class="friendship-layout">
+                    <div class="friends-panel panel">
+                        <div class="section-heading">
+                            <div>
+                                <h2>My friends</h2>
+                                <p class="section-description">Your gaming circle.</p>
+                            </div>
+                            <button id="refresh-friends-btn" class="btn btn-secondary">Refresh</button>
+                        </div>
+                        <ul id="friends-list" class="data-list"></ul>
                     </div>
-                </form>
-                <ul id="friends-list" class="data-list"></ul>
-                <h2>Incoming requests <span id="incoming-count">(0)</span></h2>
-                <ul id="incoming-requests-list" class="data-list"></ul>
-                <h2>Outgoing requests <span id="outgoing-count">(0)</span></h2>
-                <ul id="outgoing-requests-list" class="data-list"></ul>
+                    <form id="friend-request-form" class="friend-request-form panel">
+                        <h2>Add a friend</h2>
+                        <p class="section-description">Send a request to another player.</p>
+                        <label for="friend-nickname">Nickname</label>
+                        <div class="friend-form-controls">
+                            <input id="friend-nickname" class="friend-input" type="text" name="nickname" maxlength="50" required autocomplete="off" placeholder="Enter exact nickname">
+                            <button id="send-friend-request-btn" class="btn btn-primary" type="submit">Send request</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="requests-grid">
+                    <section class="panel request-panel" aria-labelledby="incoming-heading">
+                        <h2 id="incoming-heading">Incoming requests <span id="incoming-count" class="count-badge">(0)</span></h2>
+                        <p class="section-description">Players who want to connect with you.</p>
+                        <ul id="incoming-requests-list" class="data-list"></ul>
+                    </section>
+                    <section class="panel request-panel" aria-labelledby="outgoing-heading">
+                        <h2 id="outgoing-heading">Outgoing requests <span id="outgoing-count" class="count-badge">(0)</span></h2>
+                        <p class="section-description">Requests waiting for a response.</p>
+                        <ul id="outgoing-requests-list" class="data-list"></ul>
+                    </section>
+                </div>
             </section>
             
             <div id="game-form" class="game-form">
+                <h2>Add a game</h2>
+                <label for="game-name">Choose a game</label>
                 <select id="game-name" class="game-input">
                     <option value="">Select a game</option>
                 </select>
@@ -56,6 +80,7 @@
             
             <div id="users-container" class="data-container">
                 <h2>All users</h2>
+                <p class="section-description">Find players and manage your connections.</p>
                 <label for="user-search">Search by nickname</label>
                 <input id="user-search" class="friend-input user-search" type="search" placeholder="Find a player" autocomplete="off">
                 <ul id="users-list" class="data-list"></ul>
