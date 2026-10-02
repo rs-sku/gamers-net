@@ -22,7 +22,9 @@ from backend.users.security import (
 
 
 class Service:
-    def __init__(self, pg_repository: PgRepository, neo4j_repository: Neo4jRepository) -> None:
+    def __init__(
+        self, pg_repository: PgRepository, neo4j_repository: Neo4jRepository
+    ) -> None:
         self._pg_repository = pg_repository
         self._neo4j_repository = neo4j_repository
 
@@ -38,11 +40,16 @@ class Service:
             elif "users_email_key" in str(e.orig):
                 raise HTTPException(status_code=409, detail="Email already exists")
             else:
-                raise HTTPException(status_code=409, detail="An unknown integrity error occurred")
+                raise HTTPException(
+                    status_code=409, detail="An unknown integrity error occurred"
+                )
 
     async def get_users(self) -> list[UserResponseSchema]:
         users = await self._pg_repository.get_by_filters(User)
-        return [UserResponseSchema.model_validate(user, from_attributes=True) for user in users]
+        return [
+            UserResponseSchema.model_validate(user, from_attributes=True)
+            for user in users
+        ]
 
     async def get_current_user(self, user_id: int) -> UserResponseSchema:
         users = await self._pg_repository.get_by_filters(User, id=user_id)
@@ -68,7 +75,9 @@ class Service:
         return user.id
 
     async def login_user(self, data: UserLoginSchema) -> str:
-        user_id = await self._authenticate_user(data.password, data.nickname, data.email)
+        user_id = await self._authenticate_user(
+            data.password, data.nickname, data.email
+        )
         return create_access_token(data={"user_id": user_id})
 
     async def get_friends(self, name: str) -> GetFriendsResponseSchema:
@@ -110,7 +119,9 @@ class Service:
         if friend is None:
             raise NotFoundException("User not found")
         if friend.id == user_id:
-            raise HTTPException(status_code=400, detail="Cannot send a friend request to yourself")
+            raise HTTPException(
+                status_code=400, detail="Cannot send a friend request to yourself"
+            )
 
         if friend_name in await self._neo4j_repository.get_friends(user.nickname):
             raise HTTPException(status_code=400, detail="Users are already friends")
@@ -120,20 +131,23 @@ class Service:
             requesting_user_id=friend.id,
             requested_user_id=user_id,
         )
-        if any(request.status != FriendRequestStatus.REJECTED for request in incoming_requests):
+        if any(
+            request.status != FriendRequestStatus.REJECTED
+            for request in incoming_requests
+        ):
             raise HTTPException(
                 status_code=400, detail="Valid incoming friend request already exists"
             )
 
-        requests = await self._pg_repository.get_by_filters(
-            FriendRequest,
+        request = await self._pg_repository.get_friend_request_for_update(
             requesting_user_id=user_id,
             requested_user_id=friend.id,
         )
-        request = requests[0] if requests else None
 
         if request is not None and request.status != FriendRequestStatus.REJECTED:
-            raise HTTPException(status_code=400, detail="Valid friend request already exists")
+            raise HTTPException(
+                status_code=400, detail="Valid friend request already exists"
+            )
 
         try:
             if request is not None:
@@ -167,12 +181,10 @@ class Service:
                 detail="Friend request can only be accepted or rejected",
             )
 
-        requests = await self._pg_repository.get_by_filters(
-            model=FriendRequest,
-            requested_user_id=requested_user_id,
+        request = await self._pg_repository.get_friend_request_for_update(
             requesting_user_id=requesting_user_id,
+            requested_user_id=requested_user_id,
         )
-        request = requests[0] if requests else None
         if request is None:
             raise NotFoundException("Friend request not found")
 
@@ -182,14 +194,27 @@ class Service:
                 detail=f"Friend request status must be '{FriendRequestStatus.PENDING}'",
             )
 
-        if new_status == FriendRequestStatus.ACCEPTED:
-            await self._add_friend(request)
+        # TODO: Заменить запись в две БД на transactional outbox:
+        # сохранять статус заявки и событие в одной транзакции PostgreSQL
+        # (источник истины). Воркер применяет событие в Neo4j идемпотентно,
+        # отмечает доставку только после успеха и повторяет попытки при сбоях.
+        # Использовать ID пользователей и порядок/версии событий для пары;
+        # добавить сверку Neo4j с PostgreSQL для восстановления расхождений.
+        friendship = None
+        try:
+            if new_status == FriendRequestStatus.ACCEPTED:
+                sender = await self.get_current_user(requesting_user_id)
+                receiver = await self.get_current_user(requested_user_id)
+                friendship = (sender.nickname, receiver.nickname)
+                await self._neo4j_repository.add_friend(*friendship)
 
-        request.status = new_status
-        await self._pg_repository.update(request)
+            request.status = new_status
+            await self._pg_repository.update(request, refresh=False)
+        except Exception:
+            try:
+                if friendship is not None:
+                    await self._neo4j_repository.remove_friend(*friendship)
+            finally:
+                await self._pg_repository.rollback()
+            raise
         return UpdatePendingFriendRequestStatusSchema(new_status=new_status)
-
-    async def _add_friend(self, request: FriendRequest) -> None:
-        sender = await self.get_current_user(request.requesting_user_id)
-        receiver = await self.get_current_user(request.requested_user_id)
-        await self._neo4j_repository.add_friend(sender.nickname, receiver.nickname)

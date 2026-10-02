@@ -39,7 +39,7 @@ export async function logout() {
 }
 
 export async function checkAuth() {
-    return handleRequest(`${API_URL}/users`, {
+    return handleRequest(`${API_URL}/users/me`, {
         method: 'GET',
         credentials: 'include'
     });

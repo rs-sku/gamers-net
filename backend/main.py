@@ -1,11 +1,10 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
-from neo4j import AsyncGraphDatabase, AsyncDriver
-
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from neo4j import AsyncDriver, AsyncGraphDatabase
 
 from backend.core.config import CORS_CONFIG
 from backend.core.database_pg import DbSession, close_orm, init_orm
@@ -50,8 +49,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 
 
 app = FastAPI(lifespan=lifespan)
-app.add_middleware(CORSMiddleware, **CORS_CONFIG)
 app.middleware("http")(auth_middleware)
+app.add_middleware(CORSMiddleware, **CORS_CONFIG)
 app.add_exception_handler(HTTPException, http_exception_handler)
 
 for router in routers:

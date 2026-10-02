@@ -16,7 +16,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 # TODO JWT не имеет срока действия exp
-# Middleware не проверяет, что в валидном токене действительно есть user_id.
 def create_access_token(data: dict) -> str:
     return jwt.encode(data, Settings.SECRET_KEY, Settings.ALGORITHM)
 

@@ -13,6 +13,9 @@ class BasePgRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
+    async def rollback(self) -> None:
+        await self._session.rollback()
+
     async def add(
         self,
         model: type[ModelT],
@@ -33,8 +36,9 @@ class BasePgRepository:
         result = query.scalars().all()
         return result
 
-    async def update(self, model: ModelT) -> ModelT:
+    async def update(self, model: ModelT, refresh: bool = True) -> ModelT:
         self._session.add(model)
         await self._session.commit()
-        await self._session.refresh(model)
+        if refresh:
+            await self._session.refresh(model)
         return model

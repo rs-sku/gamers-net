@@ -1,5 +1,7 @@
-from fastapi import Request
-from fastapi.responses import JSONResponse
+from collections.abc import Awaitable, Callable
+
+from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse, Response
 
 from backend.users.security import decode_access_token
 
@@ -17,12 +19,19 @@ protected_routes = [
 ]
 
 
-async def auth_middleware(request: Request, call_next):
+async def auth_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     if (request.method, request.url.path) not in protected_routes:
         return await call_next(request)
     token = request.cookies.get("access_token")
     if not token:
         return JSONResponse(status_code=401, content={"detail": "Not authenticated"})
-    user_id = decode_access_token(token).get("user_id")
+    try:
+        user_id = decode_access_token(token).get("user_id")
+        if type(user_id) is not int or user_id <= 0:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException as exc:
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
     request.state.user_id = user_id
     return await call_next(request)
