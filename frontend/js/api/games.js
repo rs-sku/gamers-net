@@ -16,18 +16,20 @@ async function handleRequest(url, options) {
             if (data.detail === 'Pair user_id and game_id already exists') {
                 throw new Error('You already have this game');
             }
-            throw new Error(typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail));
+            const error = new Error(typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail));
+            error.status = response.status;
+            throw error;
         }
         
         return data;
     } catch (error) {
         console.error('Request error:', error);
-        throw new Error(error.message || 'Network error occurred');
+        throw error;
     }
 }
 
-export async function getUserGames() {
-    return handleRequest(`${API_URL}/games`, {
+export async function getUserGames(userId) {
+    return handleRequest(`${API_URL}/games?${new URLSearchParams({ user_id: userId })}`, {
         method: 'GET',
         credentials: 'include'
     });

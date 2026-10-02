@@ -1,5 +1,6 @@
 import { getFriendshipOverview, sendFriendRequest, processFriendRequest } from '../api/friends.js';
 import { showNotification } from '../components/notification.js';
+import { playerLink } from '../components/player-link.js';
 
 export function initializeFriends(currentUser, showSection) {
     let state = { users: [], friends: [], incoming: [], outgoing: [] };
@@ -27,7 +28,8 @@ export function initializeFriends(currentUser, showSection) {
         item.className = 'data-item friend-item';
         const info = document.createElement('div');
         info.className = 'player-info';
-        const name = document.createElement('strong');
+        const user = state.users.find(user => user.nickname === nickname);
+        const name = user ? playerLink(user, currentUser.id) : document.createElement('strong');
         name.textContent = nickname;
         info.appendChild(name);
         if (email) {

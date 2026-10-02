@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base href="http://localhost:8080/">
+    <title>GamersNet - Player profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/components/buttons.css">
+    <link rel="stylesheet" href="css/components/forms.css">
+    <link rel="stylesheet" href="css/pages/profile.css">
+</head>
+<body>
+    <div class="container">
+        <header class="profile-header">
+            <div>
+                <a class="brand" href="/">GamersNet</a>
+                <h1 id="player-name">Player profile</h1>
+                <p class="profile-nickname">Games and gaming circle</p>
+            </div>
+            <a class="btn btn-secondary" href="templates/pages/profile.html">My profile</a>
+        </header>
+        <main>
+            <p id="player-status" class="profile-status list-message" role="status">Loading profile…</p>
+            <div id="player-error" class="error-message profile-status" role="alert" hidden></div>
+            <button id="retry-profile-btn" class="btn btn-secondary" type="button" hidden>Try again</button>
+            <div id="player-content" class="player-profile-grid" hidden>
+                <section class="panel" aria-labelledby="player-games-heading">
+                    <h2 id="player-games-heading">Games <span id="player-games-count" class="count-badge"></span></h2>
+                    <p class="section-description">This player's game collection.</p>
+                    <ul id="player-games" class="data-list" aria-live="polite"></ul>
+                    <button id="retry-games-btn" class="btn btn-secondary list-retry" type="button" hidden>Try again</button>
+                </section>
+                <section class="panel" aria-labelledby="player-friends-heading">
+                    <h2 id="player-friends-heading">Friends <span id="player-friends-count" class="count-badge"></span></h2>
+                    <p class="section-description">Players they connect with.</p>
+                    <ul id="player-friends" class="data-list" aria-live="polite"></ul>
+                    <button id="retry-friends-btn" class="btn btn-secondary list-retry" type="button" hidden>Try again</button>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="js/pages/player.js"></script>
+</body>
+</html>

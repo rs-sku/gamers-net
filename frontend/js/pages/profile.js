@@ -3,6 +3,8 @@ import { getUserGames, addUserGame, getAllGames } from '../api/games.js';
 import { showNotification } from '../components/notification.js';
 import { initializeFriends } from './friends.js';
 
+let currentUserId;
+
 function showSection(sectionId) {
     const sections = ['friends-container', 'users-container', 'games-container', 'game-form'];
     sections.forEach(id => {
@@ -34,7 +36,7 @@ async function checkAuthentication() {
 async function fetchUserGames() {
     showSection('games-container');
     try {
-        const games = await getUserGames();
+        const games = await getUserGames(currentUserId);
         displayGames(games);
     } catch (error) {
         console.error('Error:', error);
@@ -170,6 +172,7 @@ async function handleLogout() {
 document.addEventListener('DOMContentLoaded', async () => {
     const currentUser = await checkAuthentication();
     if (currentUser) {
+        currentUserId = currentUser.id;
         initializeEventListeners();
         initializeFriends(currentUser, showSection);
     }

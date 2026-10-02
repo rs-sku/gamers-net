@@ -36,6 +36,10 @@ export async function getFriendshipOverview(nickname) {
     return { users, friends: friends.friends, incoming, outgoing };
 }
 
+export function getFriends(nickname) {
+    return request(`/friends?${new URLSearchParams({ name: nickname })}`);
+}
+
 export function sendFriendRequest(nickname) {
     return request(`/friend-request?${new URLSearchParams({ friend_name: nickname })}`, {
         method: 'POST'
