@@ -8,6 +8,8 @@ protected_routes = [
     ("POST", "/api/v1/games"),
     ("GET", "/api/v1/games"),
     ("DELETE", "/api/v1/games"),
+    ("POST", "/api/v1/users/friend"),
+    ("GET", "/api/v1/users/friends"),
 ]
 
 

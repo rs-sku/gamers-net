@@ -11,7 +11,7 @@ class Neo4jRepository:
         await self._driver.execute_query(
             "MERGE (a:Person {name: $name}) "
             "MERGE (friend:Person {name: $friend_name}) "
-            "MERGE (a)-[:KNOWS]->(friend)",
+            "MERGE (a)-[:KNOWS]-(friend)",
             name=name,
             friend_name=friend_name,
             database_=Settings.NEO4J_DB,
@@ -19,10 +19,10 @@ class Neo4jRepository:
 
     async def get_friends(self, name: str) -> list[str]:
         records, _, _ = await self._driver.execute_query(
-            "MATCH (a:Person)-[:KNOWS]->(friend) WHERE a.name = $name "
-            "RETURN friend.name ORDER BY friend.name",
+            "MATCH (a:Person {name: $name})-[:KNOWS]-(friend:Person) "
+            "RETURN friend.name AS friend_name ORDER BY friend_name",
             name=name,
             database_=Settings.NEO4J_DB,
             routing_=RoutingControl.READ,
         )
-        return [record["friend.name"] for record in records]
+        return [record["friend_name"] for record in records]

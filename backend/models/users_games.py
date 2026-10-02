@@ -1,7 +1,8 @@
-from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import CheckConstraint, Enum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.models.base import Base
+from backend.users.enums import FriendRequestStatus
 
 # To avoid circular imports, User, Game, and UserGame models are defined in the same file
 
@@ -15,6 +16,16 @@ class User(Base):
     password: Mapped[str] = mapped_column(String, nullable=False)
 
     user_games = relationship("UserGame", back_populates="user")
+    sent_requests: Mapped[list["FriendRequest"]] = relationship(
+        "FriendRequest",
+        foreign_keys="FriendRequest.requesting_user_id",
+        back_populates="sender",
+    )
+    received_requests: Mapped[list["FriendRequest"]] = relationship(
+        "FriendRequest",
+        foreign_keys="FriendRequest.requested_user_id",
+        back_populates="receiver",
+    )
 
 
 class Game(Base):
@@ -30,14 +41,41 @@ class UserGame(Base):
     __tablename__ = "users_games"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id"), nullable=False
-    )
-    game_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("games.id"), nullable=False
-    )
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    game_id: Mapped[int] = mapped_column(Integer, ForeignKey("games.id"), nullable=False)
 
     user = relationship("User", back_populates="user_games")
     game = relationship("Game", back_populates="user_games")
 
     __table_args__ = (UniqueConstraint("user_id", "game_id", name="uq_user_game"),)
+
+
+class FriendRequest(Base):
+    __tablename__ = "friend_requests"
+    __table_args__ = (
+        CheckConstraint(
+            "requesting_user_id != requested_user_id",
+            name="check_users_are_different",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    requesting_user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False
+    )
+    requested_user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+
+    status: Mapped[FriendRequestStatus] = mapped_column(
+        Enum(FriendRequestStatus), default=FriendRequestStatus.PENDING, nullable=False
+    )
+
+    sender: Mapped["User"] = relationship(
+        "User",
+        foreign_keys=[requesting_user_id],
+        back_populates="sent_requests",
+    )
+    receiver: Mapped["User"] = relationship(
+        "User",
+        foreign_keys=[requested_user_id],
+        back_populates="received_requests",
+    )

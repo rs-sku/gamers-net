@@ -1,6 +1,7 @@
 import re
 
 from pydantic import BaseModel, field_validator, model_validator
+from backend.users.enums import FriendRequestStatus
 
 
 class UserRequestSchema(BaseModel):
@@ -56,11 +57,6 @@ class UserLoginSchema(BaseModel):
         if not self.password:
             raise ValueError("Password must not be empty")
         return self
-
-
-class AddFriendRequestSchema(BaseModel):
-    name: str
-    friend_name: str
 
 
 class GetFriendsResponseSchema(BaseModel):

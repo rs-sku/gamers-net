@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Request, Response
 
 from backend.users.dependencies import ServiceDep
 from backend.users.schemas import (
-    AddFriendRequestSchema,
     GetFriendsResponseSchema,
     UserLoginSchema,
     UserRequestSchema,
@@ -38,8 +37,9 @@ async def logout(response: Response) -> bool:
 
 
 @users_router.post("/friend", response_model=bool, status_code=201)
-async def add_friend(service: ServiceDep, data: AddFriendRequestSchema) -> bool:
-    await service.add_friend(data)
+async def add_friend(service: ServiceDep, friend_name: str, request: Request) -> bool:
+    user_id = request.state.user_id
+    await service.add_friend(user_id, friend_name)
     return True
 
 

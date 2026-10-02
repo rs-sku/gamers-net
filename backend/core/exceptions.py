@@ -11,7 +11,10 @@ async def http_exception_handler(request: Request, exc: Exception) -> JSONRespon
     )
 
 
-class NotFoundException(Exception):
+class NotFoundException(HTTPException):
     def __init__(self, message: str) -> None:
         self.message = message
-        super().__init__(message)
+        super().__init__(status_code=404, detail=message)
+
+    def __str__(self) -> str:
+        return self.message

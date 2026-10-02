@@ -1,10 +1,12 @@
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 
+from backend.core.exceptions import NotFoundException
+from backend.models.users_games import FriendRequest, User
+from backend.users.enums import FriendRequestStatus
 from backend.users.neo4j_repository import Neo4jRepository
 from backend.users.pg_repository import PgRepository
 from backend.users.schemas import (
-    AddFriendRequestSchema,
     GetFriendsResponseSchema,
     UserLoginSchema,
     UserRequestSchema,
@@ -45,9 +47,12 @@ class Service:
     ) -> int:
         user = None
         if nickname:
-            user = await self._pg_repository.get_user_by_filters(nickname=nickname)
+            users = await self._pg_repository.get_by_filters(User, nickname=nickname)
+            user = users[0] if users else None
         elif email:
-            user = await self._pg_repository.get_user_by_filters(email=email)
+            users = await self._pg_repository.get_by_filters(User, email=email)
+            user = users[0] if users else None
+
         if user is None:
             raise HTTPException(status_code=404, detail="User does not exist")
         if not verify_password(password, user.password):
@@ -58,9 +63,26 @@ class Service:
         user_id = await self._authenticate_user(data.password, data.nickname, data.email)
         return create_access_token(data={"user_id": user_id})
 
-    async def add_friend(self, data: AddFriendRequestSchema) -> None:
-        await self._neo4j_repository.add_friend(data.name, data.friend_name)
+    async def add_friend(self, user_id: int, friend_name: str) -> None:
+        users = await self._pg_repository.get_by_filters(User, id=user_id)
+        user = users[0] if users else None
+        if user is None:
+            raise NotFoundException("User not found")
+
+        await self._neo4j_repository.add_friend(user.nickname, friend_name)
 
     async def get_friends(self, name: str) -> GetFriendsResponseSchema:
         friends = await self._neo4j_repository.get_friends(name)
         return GetFriendsResponseSchema(friends=friends)
+
+    async def get_user_friend_requests_by_status(
+        self, user_id: int, status: FriendRequestStatus
+    ) -> list[int]:
+        requests = await self._pg_repository.get_by_filters(
+            FriendRequest,
+            requested_user_id=user_id,
+            status=status,
+        )
+        return [request.requesting_user_id for request in requests]
+
+    # async def change_friend_request_status(self, )
