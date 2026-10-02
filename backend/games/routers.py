@@ -21,10 +21,7 @@ async def create_user_game(
 
 
 @games_router.get("", response_model=list[GetUserGamesResponseSchema])
-async def get_user_games(
-    request: Request, service: ServiceDep
-) -> list[GetUserGamesResponseSchema]:
-    user_id = request.state.user_id
+async def get_user_games(service: ServiceDep, user_id: int) -> list[GetUserGamesResponseSchema]:
     response = await service.get_user_games(user_id)
     return response
 
