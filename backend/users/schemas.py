@@ -1,6 +1,8 @@
 import re
+from typing import Literal
 
 from pydantic import BaseModel, field_validator, model_validator
+
 from backend.users.enums import FriendRequestStatus
 
 
@@ -64,7 +66,7 @@ class GetFriendsResponseSchema(BaseModel):
 
 
 class UpdatePendingFriendRequestStatusSchema(BaseModel):
-    new_status: FriendRequestStatus
+    new_status: Literal[FriendRequestStatus.ACCEPTED, FriendRequestStatus.REJECTED]
 
 
 class FriendRequestResponseSchema(BaseModel):

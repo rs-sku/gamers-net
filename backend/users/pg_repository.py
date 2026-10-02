@@ -8,6 +8,9 @@ class PgRepository(BasePgRepository):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session)
 
+    async def rollback(self) -> None:
+        await self._session.rollback()
+
     async def add_friend_request(self, validated_data: dict) -> FriendRequest:
         request = FriendRequest(**validated_data)
         self._session.add(request)

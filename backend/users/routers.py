@@ -44,17 +44,12 @@ async def get_current_user(request: Request, service: ServiceDep) -> UserRespons
     return await service.get_current_user(request.state.user_id)
 
 
-@users_router.post("/friend-request", response_model=bool, status_code=201)
-async def add_friend_request(service: ServiceDep, friend_name: str, request: Request) -> bool:
+@users_router.post("/friend-request", response_model=FriendRequestResponseSchema, status_code=201)
+async def add_friend_request(
+    service: ServiceDep, friend_name: str, request: Request
+) -> FriendRequestResponseSchema:
     user_id = request.state.user_id
-    await service.add_pending_friend_request(user_id, friend_name)
-    return True
-
-
-@users_router.post("/friend", response_model=bool, status_code=201)
-async def add_friend(service: ServiceDep, friend_request_id: int) -> bool:
-    await service.add_friend_from_accepted_friend_request(friend_request_id)
-    return True
+    return await service.add_pending_friend_request(user_id, friend_name)
 
 
 @users_router.get("/friends", response_model=GetFriendsResponseSchema, status_code=200)
@@ -64,7 +59,9 @@ async def get_friends(service: ServiceDep, name: str) -> GetFriendsResponseSchem
 
 
 @users_router.get(
-    "/incoming-friend-requests", response_model=list[FriendRequestResponseSchema], status_code=200
+    "/incoming-friend-requests",
+    response_model=list[FriendRequestResponseSchema],
+    status_code=200,
 )
 async def get_incoming_friend_requests(
     request: Request,
@@ -76,7 +73,9 @@ async def get_incoming_friend_requests(
 
 
 @users_router.get(
-    "/outgoing-friend-requests", response_model=list[FriendRequestResponseSchema], status_code=200
+    "/outgoing-friend-requests",
+    response_model=list[FriendRequestResponseSchema],
+    status_code=200,
 )
 async def get_outgoing_friend_requests(
     request: Request,
@@ -92,14 +91,14 @@ async def get_outgoing_friend_requests(
     response_model=UpdatePendingFriendRequestStatusSchema,
     status_code=200,
 )
-async def change_pending_friend_request_status(
+async def process_pending_friend_request_status(
     request: Request,
     requesting_user_id: int,
     data: UpdatePendingFriendRequestStatusSchema,
     service: ServiceDep,
 ) -> UpdatePendingFriendRequestStatusSchema:
     requested_user_id = request.state.user_id
-    return await service.change_pending_friend_request_status(
+    return await service.process_pending_friend_request_status(
         requested_user_id=requested_user_id,
         requesting_user_id=requesting_user_id,
         new_status=data.new_status,

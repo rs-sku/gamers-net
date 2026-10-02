@@ -1,10 +1,19 @@
-from sqlalchemy import CheckConstraint, Enum, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import (
+    CheckConstraint,
+    Enum,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.models.base import Base
 from backend.users.enums import FriendRequestStatus
 
-# To avoid circular imports, User, Game, and UserGame models are defined in the same file
+# User, Game, and UserGame share a file to avoid circular imports.
 
 
 class User(Base):
@@ -41,8 +50,12 @@ class UserGame(Base):
     __tablename__ = "users_games"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
-    game_id: Mapped[int] = mapped_column(Integer, ForeignKey("games.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False
+    )
+    game_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("games.id"), nullable=False
+    )
 
     user = relationship("User", back_populates="user_games")
     game = relationship("Game", back_populates="user_games")
@@ -57,13 +70,18 @@ class FriendRequest(Base):
             "requesting_user_id != requested_user_id",
             name="check_users_are_different",
         ),
+        UniqueConstraint(
+            "requesting_user_id", "requested_user_id", name="uq_friend_request_users"
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     requesting_user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=False
     )
-    requested_user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    requested_user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False
+    )
 
     status: Mapped[FriendRequestStatus] = mapped_column(
         Enum(FriendRequestStatus), default=FriendRequestStatus.PENDING, nullable=False
@@ -79,3 +97,14 @@ class FriendRequest(Base):
         foreign_keys=[requested_user_id],
         back_populates="received_requests",
     )
+
+
+Index(
+    "uq_active_friend_request_users",
+    func.least(FriendRequest.requesting_user_id, FriendRequest.requested_user_id),
+    func.greatest(FriendRequest.requesting_user_id, FriendRequest.requested_user_id),
+    unique=True,
+    postgresql_where=FriendRequest.status.in_(
+        [FriendRequestStatus.PENDING, FriendRequestStatus.ACCEPTED]
+    ),
+)

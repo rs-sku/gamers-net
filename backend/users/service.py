@@ -101,14 +101,29 @@ class Service:
             for request in requests
         ]
 
-    async def add_pending_friend_request(self, user_id: int, friend_name: str) -> None:
-        await self.get_current_user(user_id)
+    async def add_pending_friend_request(
+        self, user_id: int, friend_name: str
+    ) -> FriendRequestResponseSchema:
+        user = await self.get_current_user(user_id)
         users = await self._pg_repository.get_by_filters(User, nickname=friend_name)
         friend = users[0] if users else None
         if friend is None:
             raise NotFoundException("User not found")
         if friend.id == user_id:
             raise HTTPException(status_code=400, detail="Cannot send a friend request to yourself")
+
+        if friend_name in await self._neo4j_repository.get_friends(user.nickname):
+            raise HTTPException(status_code=400, detail="Users are already friends")
+
+        incoming_requests = await self._pg_repository.get_by_filters(
+            FriendRequest,
+            requesting_user_id=friend.id,
+            requested_user_id=user_id,
+        )
+        if any(request.status != FriendRequestStatus.REJECTED for request in incoming_requests):
+            raise HTTPException(
+                status_code=400, detail="Valid incoming friend request already exists"
+            )
 
         requests = await self._pg_repository.get_by_filters(
             FriendRequest,
@@ -117,29 +132,41 @@ class Service:
         )
         request = requests[0] if requests else None
 
-        # TODO add blocking list...
-        if request is not None:
-            if request.status != FriendRequestStatus.REJECTED:
-                raise HTTPException(status_code=400, detail="Valid friend request already exists")
+        if request is not None and request.status != FriendRequestStatus.REJECTED:
+            raise HTTPException(status_code=400, detail="Valid friend request already exists")
 
-            request.status = FriendRequestStatus.PENDING
-            await self._pg_repository.update(request)
-            return
+        try:
+            if request is not None:
+                request.status = FriendRequestStatus.PENDING
+                request = await self._pg_repository.update(request)
+            else:
+                request = await self._pg_repository.add_friend_request(
+                    {
+                        "requesting_user_id": user_id,
+                        "requested_user_id": friend.id,
+                        "status": FriendRequestStatus.PENDING,
+                    }
+                )
+        except IntegrityError:
+            await self._pg_repository.rollback()
+            raise HTTPException(status_code=409, detail="Friend request already exists")
+        return FriendRequestResponseSchema.model_validate(request, from_attributes=True)
 
-        await self._pg_repository.add_friend_request(
-            {
-                "requesting_user_id": user_id,
-                "requested_user_id": friend.id,
-                "status": FriendRequestStatus.PENDING,
-            }
-        )
-
-    async def change_pending_friend_request_status(
+    async def process_pending_friend_request_status(
         self,
         requested_user_id: int,
         requesting_user_id: int,
         new_status: FriendRequestStatus,
     ) -> UpdatePendingFriendRequestStatusSchema:
+        if new_status not in (
+            FriendRequestStatus.ACCEPTED,
+            FriendRequestStatus.REJECTED,
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Friend request can only be accepted or rejected",
+            )
+
         requests = await self._pg_repository.get_by_filters(
             model=FriendRequest,
             requested_user_id=requested_user_id,
@@ -155,21 +182,14 @@ class Service:
                 detail=f"Friend request status must be '{FriendRequestStatus.PENDING}'",
             )
 
+        if new_status == FriendRequestStatus.ACCEPTED:
+            await self._add_friend(request)
+
         request.status = new_status
-        updated = await self._pg_repository.update(request)
-        return UpdatePendingFriendRequestStatusSchema(new_status=updated.status)
+        await self._pg_repository.update(request)
+        return UpdatePendingFriendRequestStatusSchema(new_status=new_status)
 
-    async def add_friend_from_accepted_friend_request(self, friend_request_id: int) -> None:
-        requests = await self._pg_repository.get_by_filters(FriendRequest, id=friend_request_id)
-        request = requests[0] if requests else None
-        if request is None:
-            raise NotFoundException("Request not found")
-        if request.status != FriendRequestStatus.ACCEPTED:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Friend request status must be '{FriendRequestStatus.ACCEPTED}'",
-            )
-
-        name = request.sender.nickname
-        friend_name = request.receiver.nickname
-        await self._neo4j_repository.add_friend(name, friend_name)
+    async def _add_friend(self, request: FriendRequest) -> None:
+        sender = await self.get_current_user(request.requesting_user_id)
+        receiver = await self.get_current_user(request.requested_user_id)
+        await self._neo4j_repository.add_friend(sender.nickname, receiver.nickname)
