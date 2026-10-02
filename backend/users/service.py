@@ -28,7 +28,7 @@ class Service:
         validated_data = data.model_dump()
         validated_data["password"] = get_password_hash(validated_data["password"])
         try:
-            user = await self._pg_repository.add_user(validated_data)
+            user = await self._pg_repository.add(User, validated_data)
             return UserResponseSchema.model_validate(user, from_attributes=True)
         except IntegrityError as e:
             if "users_nickname_key" in str(e.orig):
@@ -39,7 +39,7 @@ class Service:
                 raise HTTPException(status_code=409, detail="An unknown integrity error occurred")
 
     async def get_users(self) -> list[UserResponseSchema]:
-        users = await self._pg_repository.get_users()
+        users = await self._pg_repository.get_by_filters(User)
         return [UserResponseSchema.model_validate(user, from_attributes=True) for user in users]
 
     async def _authenticate_user(

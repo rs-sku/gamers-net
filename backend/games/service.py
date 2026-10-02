@@ -9,6 +9,7 @@ from backend.games.schemas import (
     GetUserGamesResponseSchema,
     UserGameRequestSchema,
 )
+from backend.models.users_games import Game
 
 
 class Service:
@@ -45,7 +46,7 @@ class Service:
         await self._pg_repository.add_games(games_data)
 
     async def get_all_games(self) -> list[GetGameResponseSchema]:
-        games = await self._pg_repository.get_all_games()
+        games = await self._pg_repository.get_by_filters(model=Game)
         return [GetGameResponseSchema.model_validate(game, from_attributes=True) for game in games]
 
     async def delete_user_game(self, data: UserGameRequestSchema, user_id: int) -> None:
