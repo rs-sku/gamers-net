@@ -1,3 +1,5 @@
+import { getAllPagesResponse } from './pagination.js';
+
 const API_URL = 'http://localhost:8000/api/v1';
 
 async function handleRequest(url, options) {
@@ -46,8 +48,10 @@ export async function checkAuth() {
 }
 
 export async function getAllUsers() {
-    return handleRequest(`${API_URL}/users`, {
-        method: 'GET',
-        credentials: 'include'
-    });
+    return getAllPagesResponse(pagination => handleRequest(
+        `${API_URL}/users?${new URLSearchParams(pagination)}`, {
+            method: 'GET',
+            credentials: 'include'
+        }
+    ));
 }

@@ -1,3 +1,5 @@
+import { getAllPages } from './pagination.js';
+
 const API_URL = 'http://localhost:8000/api/v1/users';
 
 async function request(path, options = {}) {
@@ -28,16 +30,23 @@ async function request(path, options = {}) {
 
 export async function getFriendshipOverview(nickname) {
     const [users, friends, incoming, outgoing] = await Promise.all([
-        request(''),
-        request(`/friends?${new URLSearchParams({ name: nickname })}`),
-        request('/incoming-friend-requests?status=pending'),
-        request('/outgoing-friend-requests?status=pending')
+        getAllPages(pagination => request(`?${new URLSearchParams(pagination)}`)),
+        getFriends(nickname),
+        getAllPages(pagination => request(
+            `/incoming-friend-requests?${new URLSearchParams({ status: 'pending', ...pagination })}`
+        )),
+        getAllPages(pagination => request(
+            `/outgoing-friend-requests?${new URLSearchParams({ status: 'pending', ...pagination })}`
+        ))
     ]);
     return { users, friends: friends.friends, incoming, outgoing };
 }
 
-export function getFriends(nickname) {
-    return request(`/friends?${new URLSearchParams({ name: nickname })}`);
+export async function getFriends(nickname) {
+    const friends = await getAllPages(pagination => request(
+        `/friends?${new URLSearchParams({ name: nickname, ...pagination })}`
+    ), data => data.friends);
+    return { friends };
 }
 
 export function sendFriendRequest(nickname) {

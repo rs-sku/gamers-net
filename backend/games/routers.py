@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request
 
+from backend.core.pagination import PaginationDep
 from backend.games.dependencies import ServiceDep
 from backend.games.schemas import (
     CreateUserGameResponseSchema,
@@ -21,14 +22,18 @@ async def create_user_game(
 
 
 @games_router.get("", response_model=list[GetUserGamesResponseSchema])
-async def get_user_games(service: ServiceDep, user_id: int) -> list[GetUserGamesResponseSchema]:
-    response = await service.get_user_games(user_id)
+async def get_user_games(
+    service: ServiceDep, user_id: int, pagination: PaginationDep
+) -> list[GetUserGamesResponseSchema]:
+    response = await service.get_user_games(user_id, pagination)
     return response
 
 
 @games_router.get("/all", response_model=list[GetGameResponseSchema])
-async def get_all_games(service: ServiceDep) -> list[GetGameResponseSchema]:
-    response = await service.get_all_games()
+async def get_all_games(
+    service: ServiceDep, pagination: PaginationDep
+) -> list[GetGameResponseSchema]:
+    response = await service.get_all_games(pagination)
     return response
 
 

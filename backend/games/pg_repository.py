@@ -1,12 +1,12 @@
 from typing import Sequence
 
-from sqlalchemy import delete, select
+from sqlalchemy import RowMapping, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 
 from backend.core.base_pg_repository import BasePgRepository
 from backend.core.exceptions import NotFoundException
-from backend.models.users_games import Game, UserGame
+from backend.core.pagination import Pagination
+from backend.models.users_games import Game, User, UserGame
 
 
 class PgRepository(BasePgRepository):
@@ -28,13 +28,23 @@ class PgRepository(BasePgRepository):
         await self._session.refresh(user_game)
         return user_game
 
-    async def get_user_games(self, user_id: int) -> Sequence[UserGame]:
+    async def get_user_games(self, user_id: int, pagination: Pagination) -> Sequence[RowMapping]:
         result = await self._session.execute(
-            select(UserGame)
-            .options(joinedload(UserGame.game), joinedload(UserGame.user))
-            .filter_by(user_id=user_id)
+            select(
+                UserGame.id,
+                UserGame.user_id,
+                UserGame.game_id,
+                User.nickname.label("user_nickname"),
+                Game.name.label("game_name"),
+            )
+            .join(User, User.id == UserGame.user_id)
+            .join(Game, Game.id == UserGame.game_id)
+            .where(UserGame.user_id == user_id)
+            .order_by(UserGame.id)
+            .limit(pagination.limit)
+            .offset(pagination.offset)
         )
-        return result.scalars().all()
+        return result.mappings().all()
 
     async def add_games(self, games_data: list[dict]) -> None:
         new_games = []
@@ -55,7 +65,5 @@ class PgRepository(BasePgRepository):
 
         if game is None:
             raise NotFoundException(f"{game_name} not found")
-        await self._session.execute(
-            delete(UserGame).filter_by(user_id=user_id, game_id=game.id)
-        )
+        await self._session.execute(delete(UserGame).filter_by(user_id=user_id, game_id=game.id))
         await self._session.commit()

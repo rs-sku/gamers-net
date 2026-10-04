@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Response
 
+from backend.core.pagination import PaginationDep
 from backend.users.dependencies import ServiceDep
 from backend.users.enums import FriendRequestStatus
 from backend.users.schemas import (
@@ -15,9 +16,7 @@ users_router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
 
 @users_router.post("", response_model=UserResponseSchema, status_code=201)
-async def create_user(
-    data: UserRequestSchema, service: ServiceDep
-) -> UserResponseSchema:
+async def create_user(data: UserRequestSchema, service: ServiceDep) -> UserResponseSchema:
     response = await service.add_user(data)
     return response
 
@@ -30,8 +29,8 @@ async def login(response: Response, data: UserLoginSchema, service: ServiceDep) 
 
 
 @users_router.get("", response_model=list[UserResponseSchema], status_code=200)
-async def get_users(service: ServiceDep) -> list[UserResponseSchema]:
-    response = await service.get_users()
+async def get_users(service: ServiceDep, pagination: PaginationDep) -> list[UserResponseSchema]:
+    response = await service.get_users(pagination)
     return response
 
 
@@ -46,9 +45,7 @@ async def get_current_user(request: Request, service: ServiceDep) -> UserRespons
     return await service.get_current_user(request.state.user_id)
 
 
-@users_router.post(
-    "/friend-request", response_model=FriendRequestResponseSchema, status_code=201
-)
+@users_router.post("/friend-request", response_model=FriendRequestResponseSchema, status_code=201)
 async def add_friend_request(
     service: ServiceDep, friend_name: str, request: Request
 ) -> FriendRequestResponseSchema:
@@ -57,8 +54,10 @@ async def add_friend_request(
 
 
 @users_router.get("/friends", response_model=GetFriendsResponseSchema, status_code=200)
-async def get_friends(service: ServiceDep, name: str) -> GetFriendsResponseSchema:
-    friends = await service.get_friends(name)
+async def get_friends(
+    service: ServiceDep, name: str, pagination: PaginationDep
+) -> GetFriendsResponseSchema:
+    friends = await service.get_friends(name, pagination)
     return friends
 
 
@@ -71,9 +70,10 @@ async def get_incoming_friend_requests(
     request: Request,
     status: FriendRequestStatus,
     service: ServiceDep,
+    pagination: PaginationDep,
 ) -> list[FriendRequestResponseSchema]:
     user_id = request.state.user_id
-    return await service.get_user_incoming_friend_requests_by_status(user_id, status)
+    return await service.get_user_incoming_friend_requests_by_status(user_id, status, pagination)
 
 
 @users_router.get(
@@ -85,9 +85,10 @@ async def get_outgoing_friend_requests(
     request: Request,
     status: FriendRequestStatus,
     service: ServiceDep,
+    pagination: PaginationDep,
 ) -> list[FriendRequestResponseSchema]:
     user_id = request.state.user_id
-    return await service.get_user_outgoing_friend_requests_by_status(user_id, status)
+    return await service.get_user_outgoing_friend_requests_by_status(user_id, status, pagination)
 
 
 @users_router.patch(

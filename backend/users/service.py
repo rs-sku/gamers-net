@@ -1,7 +1,9 @@
 from fastapi import HTTPException
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.exc import IntegrityError
 
 from backend.core.exceptions import NotFoundException
+from backend.core.pagination import Pagination
 from backend.models.users_games import FriendRequest, User
 from backend.users.enums import FriendRequestStatus
 from backend.users.neo4j_repository import Neo4jRepository
@@ -28,7 +30,9 @@ class Service:
 
     async def add_user(self, data: UserRequestSchema) -> UserResponseSchema:
         validated_data = data.model_dump()
-        validated_data["password"] = get_password_hash(validated_data["password"])
+        validated_data["password"] = await run_in_threadpool(
+            get_password_hash, validated_data["password"]
+        )
         try:
             user = await self._pg_repository.add(User, validated_data)
             return UserResponseSchema.model_validate(user, from_attributes=True)
@@ -40,9 +44,9 @@ class Service:
             else:
                 raise HTTPException(status_code=409, detail="An unknown integrity error occurred")
 
-    async def get_users(self) -> list[UserResponseSchema]:
-        users = await self._pg_repository.get_by_filters(User)
-        return [UserResponseSchema.model_validate(user, from_attributes=True) for user in users]
+    async def get_users(self, pagination: Pagination) -> list[UserResponseSchema]:
+        users = await self._pg_repository.get_page(User, ("id", "nickname", "email"), pagination)
+        return [UserResponseSchema.model_validate(user) for user in users]
 
     async def get_current_user(self, user_id: int) -> UserResponseSchema:
         users = await self._pg_repository.get_by_filters(User, id=user_id)
@@ -63,7 +67,7 @@ class Service:
 
         if user is None:
             raise HTTPException(status_code=404, detail="User does not exist")
-        if not verify_password(password, user.password):
+        if not await run_in_threadpool(verify_password, password, user.password):
             raise HTTPException(status_code=400, detail="Wrong password")
         return user.id
 
@@ -71,35 +75,33 @@ class Service:
         user_id = await self._authenticate_user(data.password, data.nickname, data.email)
         return create_access_token(data={"user_id": user_id})
 
-    async def get_friends(self, name: str) -> GetFriendsResponseSchema:
-        friends = await self._neo4j_repository.get_friends(name)
+    async def get_friends(self, name: str, pagination: Pagination) -> GetFriendsResponseSchema:
+        friends = await self._neo4j_repository.get_friends(name, pagination)
         return GetFriendsResponseSchema(friends=friends)
 
     async def get_user_incoming_friend_requests_by_status(
-        self, user_id: int, status: FriendRequestStatus
+        self, user_id: int, status: FriendRequestStatus, pagination: Pagination
     ) -> list[FriendRequestResponseSchema]:
-        requests = await self._pg_repository.get_by_filters(
+        requests = await self._pg_repository.get_page(
             FriendRequest,
+            ("id", "requesting_user_id", "requested_user_id", "status"),
+            pagination,
             requested_user_id=user_id,
             status=status,
         )
-        return [
-            FriendRequestResponseSchema.model_validate(request, from_attributes=True)
-            for request in requests
-        ]
+        return [FriendRequestResponseSchema.model_validate(request) for request in requests]
 
     async def get_user_outgoing_friend_requests_by_status(
-        self, user_id: int, status: FriendRequestStatus
+        self, user_id: int, status: FriendRequestStatus, pagination: Pagination
     ) -> list[FriendRequestResponseSchema]:
-        requests = await self._pg_repository.get_by_filters(
+        requests = await self._pg_repository.get_page(
             FriendRequest,
+            ("id", "requesting_user_id", "requested_user_id", "status"),
+            pagination,
             requesting_user_id=user_id,
             status=status,
         )
-        return [
-            FriendRequestResponseSchema.model_validate(request, from_attributes=True)
-            for request in requests
-        ]
+        return [FriendRequestResponseSchema.model_validate(request) for request in requests]
 
     async def add_pending_friend_request(
         self, user_id: int, friend_name: str
@@ -112,7 +114,7 @@ class Service:
         if friend.id == user_id:
             raise HTTPException(status_code=400, detail="Cannot send a friend request to yourself")
 
-        if friend_name in await self._neo4j_repository.get_friends(user.nickname):
+        if await self._neo4j_repository.are_friends(user.nickname, friend_name):
             raise HTTPException(status_code=400, detail="Users are already friends")
 
         incoming_requests = await self._pg_repository.get_by_filters(

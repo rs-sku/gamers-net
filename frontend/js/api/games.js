@@ -1,3 +1,5 @@
+import { getAllPages } from './pagination.js';
+
 const API_URL = 'http://localhost:8000/api/v1';
 
 async function handleRequest(url, options) {
@@ -29,10 +31,12 @@ async function handleRequest(url, options) {
 }
 
 export async function getUserGames(userId) {
-    return handleRequest(`${API_URL}/games?${new URLSearchParams({ user_id: userId })}`, {
-        method: 'GET',
-        credentials: 'include'
-    });
+    return getAllPages(pagination => handleRequest(
+        `${API_URL}/games?${new URLSearchParams({ user_id: userId, ...pagination })}`, {
+            method: 'GET',
+            credentials: 'include'
+        }
+    ));
 }
 
 export async function addUserGame(gameName) {
@@ -44,8 +48,10 @@ export async function addUserGame(gameName) {
 }
 
 export async function getAllGames() {
-    return handleRequest(`${API_URL}/games/all`, {
-        method: 'GET',
-        credentials: 'include'
-    });
+    return getAllPages(pagination => handleRequest(
+        `${API_URL}/games/all?${new URLSearchParams(pagination)}`, {
+            method: 'GET',
+            credentials: 'include'
+        }
+    ));
 }

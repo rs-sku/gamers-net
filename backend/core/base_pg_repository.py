@@ -1,9 +1,10 @@
 from collections.abc import Sequence
 from typing import TypeVar
 
-from sqlalchemy import select
+from sqlalchemy import RowMapping, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.core.pagination import Pagination
 from backend.models.base import Base
 
 ModelT = TypeVar("ModelT", bound=Base)
@@ -35,6 +36,23 @@ class BasePgRepository:
         query = await self._session.execute(select(model).filter_by(**filters))
         result = query.scalars().all()
         return result
+
+    async def get_page(
+        self,
+        model: type[ModelT],
+        columns: tuple[str, ...],
+        pagination: Pagination,
+        **filters: object,
+    ) -> Sequence[RowMapping]:
+        statement = (
+            select(*(getattr(model, column) for column in columns))
+            .filter_by(**filters)
+            .order_by(getattr(model, "id"))
+            .limit(pagination.limit)
+            .offset(pagination.offset)
+        )
+        result = await self._session.execute(statement)
+        return result.mappings().all()
 
     async def update(self, model: ModelT, refresh: bool = True) -> ModelT:
         self._session.add(model)
