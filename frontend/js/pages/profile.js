@@ -2,6 +2,7 @@ import { logout, checkAuth } from '../api/auth.js';
 import { getUserGames, addUserGame, getAllGames } from '../api/games.js';
 import { showNotification } from '../components/notification.js';
 import { initializeFriends } from './friends.js';
+import { setButtonLoading } from '../components/button-loading.js';
 
 let currentUserId;
 
@@ -34,13 +35,18 @@ async function checkAuthentication() {
 }
 
 async function fetchUserGames() {
+    const button = document.getElementById('show-games-btn');
+    if (button.disabled) return;
     showSection('games-container');
+    setButtonLoading(button, true);
     try {
         const games = await getUserGames(currentUserId);
         displayGames(games);
     } catch (error) {
         console.error('Error:', error);
         showNotification('Error fetching games');
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 
@@ -58,6 +64,9 @@ function displayGames(games) {
 
 // Обновляем функцию loadAvailableGames
 async function loadAvailableGames() {
+    const button = document.getElementById('submit-game-btn');
+    if (button.disabled) return;
+    setButtonLoading(button, true);
     try {
         const games = await getAllGames();
         console.log('Games data:', games);
@@ -80,6 +89,8 @@ async function loadAvailableGames() {
     } catch (error) {
         console.error('Error loading games:', error);
         showNotification('Error loading available games');
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 
@@ -97,6 +108,8 @@ function toggleGameForm() {
 // Обновляем функцию handleAddGame
 async function handleAddGame(event) {
     event?.preventDefault();
+    const button = document.getElementById('submit-game-btn');
+    if (button.disabled) return;
     
     const gameSelect = document.getElementById('game-name');
     const selectedOption = gameSelect.options[gameSelect.selectedIndex];
@@ -112,6 +125,7 @@ async function handleAddGame(event) {
         return;
     }
 
+    setButtonLoading(button, true, 'Saving…');
     try {
         console.log('Sending game name:', gameName);
         const result = await addUserGame(gameName);
@@ -125,6 +139,8 @@ async function handleAddGame(event) {
         errorElement.textContent = error.message;
         errorElement.style.display = 'block';
         showNotification(error.message);
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 

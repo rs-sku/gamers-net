@@ -48,6 +48,13 @@
 
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.button-loading-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 @media (pointer: coarse) {
     .btn, .cta-button { min-height: 44px; }
 }

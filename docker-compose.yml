@@ -9,6 +9,8 @@ services:
 
   neo4j:
     image: neo4j:5-community
+    environment:
+      - NEO4J_server_config_strict__validation_enabled=false
     env_file: '.env'
     ports:
       - '7474:7474' # Веб-интерфейс (Neo4j Browser)

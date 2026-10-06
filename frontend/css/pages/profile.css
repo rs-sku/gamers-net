@@ -140,6 +140,8 @@ input.friend-input { width: 100%; min-width: 0; }
 .player-profile-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 .player-profile-grid .data-item { overflow-wrap: anywhere; }
 .profile-status:not(:empty) { margin-bottom: 16px; }
+#player-error:not([hidden]) { display: block; }
+#retry-profile-btn { margin-bottom: 16px; }
 .list-retry { margin-top: 12px; }
 [hidden] { display: none !important; }
 

@@ -1,3 +1,4 @@
+import { setButtonLoading } from '../components/button-loading.js';
 import { checkAuth, getAllUsers } from '../api/auth.js';
 import { getUserGames } from '../api/games.js';
 import { getFriends } from '../api/friends.js';
@@ -24,21 +25,22 @@ async function loadList(kind, fetchItems, renderItem, emptyMessage) {
     const list = element(`player-${kind}`);
     const retry = element(`retry-${kind}-btn`);
     const count = element(`player-${kind}-count`);
-    retry.hidden = true;
-    count.textContent = '';
+    if (retry.disabled) return;
+    setButtonLoading(retry, true);
     list.setAttribute('aria-busy', 'true');
-    message(list, `Loading ${kind}…`);
     try {
         const items = await fetchItems();
         count.textContent = `(${items.length})`;
+        retry.dataset.idleLabel = 'Refresh';
         if (items.length) list.replaceChildren(...items.map(renderItem));
         else message(list, emptyMessage);
     } catch (error) {
         if (error.status === 401) return redirectToLogin();
         message(list, `Could not load ${kind}. ${error.message}`);
-        retry.hidden = false;
+        retry.dataset.idleLabel = 'Try again';
     } finally {
         list.setAttribute('aria-busy', 'false');
+        setButtonLoading(retry, false);
     }
 }
 
@@ -64,10 +66,13 @@ function loadFriends() {
 
 async function loadProfile() {
     const retry = element('retry-profile-btn');
-    retry.hidden = true;
+    if (retry.disabled) return;
+    setButtonLoading(retry, true);
+    element('retry-games-btn').disabled = true;
+    element('retry-friends-btn').disabled = true;
     element('player-error').hidden = true;
-    element('player-content').hidden = true;
-    element('player-status').textContent = 'Loading profile…';
+    element('player-content').setAttribute('aria-busy', 'true');
+    element('player-status').textContent = '';
     try {
         const authResponse = await checkAuth();
         if (authResponse.status === 401) return redirectToLogin();
@@ -94,12 +99,18 @@ async function loadProfile() {
         document.title = `${player.nickname} - GamersNet`;
         element('player-status').textContent = '';
         element('player-content').hidden = false;
+        retry.dataset.idleLabel = 'Refresh';
+        element('retry-games-btn').disabled = false;
+        element('retry-friends-btn').disabled = false;
         await Promise.all([loadGames(), loadFriends()]);
     } catch (error) {
         element('player-status').textContent = '';
         element('player-error').textContent = error.message;
         element('player-error').hidden = false;
-        retry.hidden = false;
+        retry.dataset.idleLabel = 'Try again';
+    } finally {
+        element('player-content').setAttribute('aria-busy', 'false');
+        setButtonLoading(retry, false);
     }
 }
 

@@ -1,3 +1,4 @@
+import { setButtonLoading } from '../components/button-loading.js';
 import { getFriendshipOverview, sendFriendRequest, processFriendRequest } from '../api/friends.js';
 import { showNotification } from '../components/notification.js';
 import { playerLink } from '../components/player-link.js';
@@ -104,11 +105,11 @@ export function initializeFriends(currentUser, showSection) {
         element('incoming-count').textContent = `(${state.incoming.length})`;
         element('outgoing-count').textContent = `(${state.outgoing.length})`;
         element('incoming-nav-count').textContent = state.incoming.length ? ` · ${state.incoming.length} incoming` : '';
-        element('friendship-status').textContent = saving ? 'Saving request…' : loading ? 'Refreshing friends and requests…' : '';
+        element('friendship-status').textContent = '';
+        setButtonLoading(element('refresh-friends-btn'), loading, 'Refreshing…');
         element('refresh-friends-btn').disabled = loading || saving;
-        element('refresh-friends-btn').textContent = loading ? 'Refreshing…' : 'Refresh';
+        setButtonLoading(element('send-friend-request-btn'), saving, 'Saving…');
         element('send-friend-request-btn').disabled = loading || saving || !loaded;
-        element('send-friend-request-btn').textContent = saving ? 'Saving…' : 'Send request';
         element('friends-container').setAttribute('aria-busy', String(loading || saving));
         renderList('friends-list', state.friends, 'No friends yet. Find a player or send a request by nickname.', nickname => row(nickname));
         renderList('incoming-requests-list', state.incoming, 'No incoming requests.', request => {

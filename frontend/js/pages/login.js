@@ -1,3 +1,4 @@
+import { setButtonLoading } from '../components/button-loading.js';
 import { login, register } from '../api/auth.js';
 import { showNotification } from '../components/notification.js';
 import { validatePassword, validateEmail, validateNickname } from '../utils/validation.js';
@@ -39,6 +40,10 @@ async function joinFormSubmit(e) {
         return;
     }
 
+    const submit = joinForm.querySelector('button[type="submit"]');
+    if (submit.disabled) return;
+    setButtonLoading(submit, true);
+    showLoginBtn.disabled = true;
     try {
         const response = await register({ nickname, email, password });
 
@@ -52,6 +57,9 @@ async function joinFormSubmit(e) {
     } catch (error) {
         console.error('Error:', error);
         showNotification('An error occurred during registration');
+    } finally {
+        setButtonLoading(submit, false);
+        showLoginBtn.disabled = false;
     }
 }
 
@@ -71,6 +79,10 @@ async function loginFormSubmit(e) {
         return;
     }
 
+    const submit = joinForm.querySelector('button[type="submit"]');
+    if (submit.disabled) return;
+    setButtonLoading(submit, true);
+    showLoginBtn.disabled = true;
     try {
         const response = await login({
             email: loginInput.includes('@') ? loginInput : null,
@@ -90,6 +102,9 @@ async function loginFormSubmit(e) {
     } catch (error) {
         console.error('Error:', error);
         showNotification('An error occurred during login');
+    } finally {
+        setButtonLoading(submit, false);
+        showLoginBtn.disabled = false;
     }
 }
 
