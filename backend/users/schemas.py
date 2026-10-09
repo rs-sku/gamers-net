@@ -6,6 +6,12 @@ from pydantic import BaseModel, field_validator, model_validator
 from backend.users.enums import FriendRequestStatus
 
 
+def validate_not_empty(value: str) -> str:
+    if not value.strip():
+        raise ValueError("Field must not be empty")
+    return value
+
+
 class UserRequestSchema(BaseModel):
     nickname: str
     email: str
@@ -13,6 +19,7 @@ class UserRequestSchema(BaseModel):
 
     @field_validator("password")
     def validate_password(cls, password: str) -> str:
+        validate_not_empty(password)
         if len(password) < 8:
             raise ValueError(
                 "Password must be at least 8 characters long, contains at least one uppercase "
@@ -39,6 +46,22 @@ class UserRequestSchema(BaseModel):
                 "letter, one lowercase letter, one digit and one special character"
             )
         return password
+
+    @field_validator("nickname")
+    def validate_nickname(cls, nickname: str) -> str:
+        validate_not_empty(nickname)
+        if len(nickname) < 3 or len(nickname) > 20:
+            raise ValueError("Nickname must be between 3 and 20 characters")
+        return nickname
+
+    @field_validator("email")
+    def validate_email(cls, email: str) -> str:
+        validate_not_empty(email)
+        if len(email) < 3 or len(email) > 20:
+            raise ValueError("Email must be between 3 and 20 characters")
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+            raise ValueError("Please enter a valid email address")
+        return email
 
 
 class UserResponseSchema(BaseModel):

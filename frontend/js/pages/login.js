@@ -1,7 +1,6 @@
 import { setButtonLoading } from '../components/button-loading.js';
 import { login, register } from '../api/auth.js';
 import { showNotification } from '../components/notification.js';
-import { validatePassword, validateEmail, validateNickname } from '../utils/validation.js';
 
 let joinForm;
 let showLoginBtn;
@@ -22,21 +21,16 @@ async function joinFormSubmit(e) {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // Validate inputs
-    const nicknameValidation = validateNickname(nickname);
-    const emailValidation = validateEmail(email);
-    const passwordValidation = validatePassword(password);
-
-    if (!nicknameValidation.isValid) {
-        document.getElementById('nickname-error').textContent = nicknameValidation.message;
+    if (!nickname.trim()) {
+        document.getElementById('nickname-error').textContent = 'Please enter your nickname';
         return;
     }
-    if (!emailValidation.isValid) {
-        document.getElementById('email-error').textContent = emailValidation.message;
+    if (!email.trim()) {
+        document.getElementById('email-error').textContent = 'Please enter your email';
         return;
     }
-    if (!passwordValidation.isValid) {
-        document.getElementById('password-error').textContent = passwordValidation.message;
+    if (!password.trim()) {
+        document.getElementById('password-error').textContent = 'Please enter your password';
         return;
     }
 
@@ -108,29 +102,37 @@ async function loginFormSubmit(e) {
     }
 }
 
+function showApiErrors(data, fallbackField = 'nickname') {
+    const errors = Array.isArray(data.detail) ? data.detail : [{ msg: data.detail }];
+    const messages = [];
+    errors.forEach(error => {
+        const field = error.loc?.[error.loc.length - 1];
+        const targetField = ['nickname', 'email', 'password'].includes(field) ? field : fallbackField;
+        const target = document.getElementById(`${targetField}-error`);
+        const message = typeof error.msg === 'string'
+            ? error.msg.replace(/^Value error, /, '') : 'The request failed. Please try again.';
+        target.textContent += `${target.textContent ? '; ' : ''}${message}`;
+        messages.push(message);
+    });
+    return messages.join('; ');
+}
+
 function handleRegistrationError(data) {
-    if (data.detail.includes('Password')) {
-        document.getElementById('password-error').textContent = data.detail;
-    } else if (data.detail.includes('Email')) {
-        document.getElementById('email-error').textContent = data.detail;
-    } else if (data.detail.includes('Nickname')) {
-        document.getElementById('nickname-error').textContent = data.detail;
-    } else {
-        document.getElementById('nickname-error').textContent = data.detail;
-    }
+    const detail = typeof data.detail === 'string' ? data.detail : '';
+    const field = /password/i.test(detail) ? 'password' : /email/i.test(detail) ? 'email' : 'nickname';
+    showApiErrors(data, field);
 }
 
 function handleLoginError(status, data) {
-    if (status === 404) {
-        showNotification('User does not exist');
-        document.getElementById('nickname-error').textContent = 'User does not exist';
-    } else if (status === 400) {
-        showNotification('Wrong password');
-        document.getElementById('password-error').textContent = 'Wrong password';
-    } else {
-        showNotification(data.detail || 'Login failed');
-        document.getElementById('password-error').textContent = data.detail || 'Login failed';
+    const field = status === 400 ? 'password' : 'nickname';
+    // The login email is entered in the nickname input.
+    if (Array.isArray(data.detail)) {
+        data.detail = data.detail.map(error => ({
+            ...error,
+            loc: error.loc?.map(part => part === 'email' ? 'nickname' : part)
+        }));
     }
+    showNotification(showApiErrors(data, field));
 }
 
 function showLoginForm() {

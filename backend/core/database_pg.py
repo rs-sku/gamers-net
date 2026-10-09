@@ -7,9 +7,10 @@ from backend.core.settings import Settings
 from backend.models.base import Base
 from backend.models.users_games import FriendRequest
 
+# TODO measure pool characteristics
 engine = create_async_engine(
     f"postgresql+asyncpg://{Settings.POSTGRES_USER}:{Settings.POSTGRES_PASSWORD}@{Settings.POSTGRES_HOST}:"
-    f"{Settings.POSTGRES_PORT}/{Settings.POSTGRES_DB}",
+    f"{Settings.POSTGRES_PORT}/{Settings.POSTGRES_DB}"
 )
 DbSession = async_sessionmaker(engine, expire_on_commit=False)
 

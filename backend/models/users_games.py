@@ -20,8 +20,8 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nickname: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-    email: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+    nickname: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
+    email: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String, nullable=False)
 
     user_games = relationship("UserGame", back_populates="user")
@@ -50,12 +50,8 @@ class UserGame(Base):
     __tablename__ = "users_games"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id"), nullable=False
-    )
-    game_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("games.id"), nullable=False
-    )
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    game_id: Mapped[int] = mapped_column(Integer, ForeignKey("games.id"), nullable=False)
 
     user = relationship("User", back_populates="user_games")
     game = relationship("Game", back_populates="user_games")
@@ -70,18 +66,12 @@ class FriendRequest(Base):
             "requesting_user_id != requested_user_id",
             name="check_users_are_different",
         ),
-        UniqueConstraint(
-            "requesting_user_id", "requested_user_id", name="uq_friend_request_users"
-        ),
+        UniqueConstraint("requesting_user_id", "requested_user_id", name="uq_friend_request_users"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    requesting_user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id"), nullable=False
-    )
-    requested_user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id"), nullable=False
-    )
+    requesting_user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    requested_user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
 
     status: Mapped[FriendRequestStatus] = mapped_column(
         Enum(FriendRequestStatus), default=FriendRequestStatus.PENDING, nullable=False
